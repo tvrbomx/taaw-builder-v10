@@ -1,0 +1,9 @@
+Lee CLAUDE.md y todo docs/ en el orden que ahí se indica.
+Cuando termines, escribe docs/V10-MODELO-DOMINIO.md.
+
+Antes de escribirlo, propon el formato de clave de concepto y de partida
+-prefijo, longitud, que significa cada segmento- con al menos dos opciones
+y su ventaja. Es la decision pendiente numero 1 y de ella depende el esquema.
+
+Para proponerlo, analiza primero los 877 conceptos reales de
+docs/referencia-v8/ESQUEMA_BASE_DE_DATOS.md y dime que patrones ya existen.

@@ -1,0 +1,3 @@
+Guarda aquí fotos de arquitectura, referencias de color y capturas
+que representen cómo debe verse TAAW Builder.
+El agente las usa como guía visual.
