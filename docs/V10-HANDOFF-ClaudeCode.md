@@ -69,16 +69,16 @@ repositorio.
 | **Producto** | TAAW Builder v10 · plataforma de control de proyecto |
 | **Quién la hace** | TAAW ThArqum Architecture Workshop |
 | **Quién la usa** | Dravya — arquitectura y construcción |
-| **Repositorio nuevo** | `TAAW Builder v10` · aún no creado |
-| **Etapa** | **4 de 4 · Ejecución.** Etapas 2 (anteproyecto) y 3 (proyecto ejecutivo) cerradas el 9-ago-2026 — cuatro etapas, no dos, resuelto contra `V10-CONCEPTO-ParaQueEsLaApp-R02` §6 |
+| **Repositorio** | `TAAW Builder v10` · creado, `github.com/tvrbomx/taaw-builder-v10` · commit `770e7a2` en `main`, local por delante de `origin` — el push sigue pendiente de que Stefanno lo corra (sin credenciales de GitHub en el entorno de ejecución) |
+| **Etapa** | **4 de 4 · Ejecución.** Etapas 2 (anteproyecto) y 3 (proyecto ejecutivo) cerradas el 9-ago-2026 — cuatro etapas, no dos, resuelto contra `V10-CONCEPTO-ParaQueEsLaApp-R02` §6. **Rebanada 1 completa y pulida, 9-ago-2026** |
 | **Escrito** | Concepto · Plan · Arquitectura · Diseño · Requisito de ciclo de obra · **Modelo de dominio R02** · **Esquema SQL R02** · **Catálogo de documentos** · **Plataforma y migración** · **Pantallas y roles** · **API** |
-| **Falta** | Nada de las etapas 1 a 3. Sigue la rebanada 1 — arquitectura y sistema de diseño |
-| **Esquema** | **APROBADO Y CONGELADO el 8-ago-2026,** con las migraciones 001 (firma en `presupuesto.AUTORIZADO`), 002 (`sincronizacion_recibida`, idempotencia) y 003 (autorrevisión con tope) aplicadas. Ver `V10-ESQUEMA-SQL` §16.2 y §19 |
+| **Falta** | Nada de las etapas 1 a 3. Rebanada 1 terminada — sigue la rebanada 2, catálogo técnico, sin arrancar todavía |
+| **Esquema** | **APROBADO Y CONGELADO el 8-ago-2026,** con las tres migraciones de diseño (001 firma en `presupuesto.AUTORIZADO`, 002 `sincronizacion_recibida`, 003 autorrevisión con tope) y las cuatro correcciones de ejecución de §19.2, todas aplicadas y verificadas contra Postgres real. Ver `V10-ESQUEMA-SQL` §16.2 y §19 |
 | **Catálogo de documentos** | **31 documentos**, escrito el 8-ago-2026. Uno bloqueado (inventario, hallazgo 8.1). Las columnas de firma y los tipos ISO propuestos, aprobados el mismo día |
 | **Plataforma y migración** | Escrito el 8-ago-2026. Frontera de almacenamiento fijada (CDE en la nube, nunca entra a TAAW Builder). **El juego de datos de prueba real es `docs/referencia-f19/`**, no las 82 filas huérfanas de la V8 |
 | **Pantallas y roles** | **34 pantallas**, escrito el 8-ago-2026. Cola local con reintento para las tres pantallas de obra en teléfono. Las 3 pantallas de junta y la autorrevisión con tope, aprobadas el 9-ago-2026 |
 | **API** | Escrito el 9-ago-2026. Server Actions por omisión, un solo Route Handler —`/api/sincronizar`— para la cola offline, con idempotencia por clave generada en el teléfono |
-| **Código** | Cero líneas todavía. Las etapas 1 a 3 están completas; la rebanada 1 es el primer código de la V10 |
+| **Código** | **Rebanada 1 completa, 9-ago-2026:** login, aislamiento por empresa (RLS verificado con dos roles reales), tema claro/oscuro, tipografía (Fraunces/Inter/JetBrains Mono), patrones Tabla y Formulario completos, Ficha y LineaDeTiempo en bosquejo. `npm run dev` en el puerto 4010 — ver README |
 
 **Nada del código de la V8 se reutiliza tal cual.** Se rescatan ideas, plantillas PDF y
 la fórmula de precio unitario. Todo lo demás se rehace.
@@ -268,7 +268,7 @@ aunque sean tres personas.
 |---|---|---|
 | ~~1~~ | ~~Formato definitivo de clave de concepto y de partida~~ · **RESUELTO 8-ago-2026.** Ver [[V10-MODELO-DOMINIO]] §2 | — |
 | ~~2~~ | ~~Aero cálido contra aero frío~~ · **RESUELTO 9-ago-2026: aero cálido.** Ver [[V10-DISENO]] §2 | — |
-| 3 | Las dos familias tipográficas | Propuesta y aprobación |
+| ~~3~~ | ~~Las dos familias tipográficas~~ · **RESUELTO 9-ago-2026: Fraunces, Inter y JetBrains Mono.** Ver [[V10-DISENO]] §5 | — |
 | ~~4~~ | ~~Catálogo definitivo de categorías de gasto~~ · **RESUELTO 8-ago-2026.** Ver [[V10-MODELO-DOMINIO]] §14 | — |
 | 5 | Logotipo de TAAW Builder y su relación con el de Dravya | Stefanno |
 | ~~6~~ | ~~Aprobar `firmado_por` / `firmado_en` en `presupuesto`~~ · **RESUELTO 8-ago-2026.** Ver [[V10-ESQUEMA-SQL]] §19, migración 001 | — |
@@ -276,6 +276,7 @@ aunque sean tres personas.
 | 8 | Actualizar `DRAVYA-NOM-NomenclaturaDocumental-R01` fuera de este repositorio: §12 `Flujograma` → `Flujo semanal`, §8 marcar `VS` en negritas como tipo que sí produce Dravya | Stefanno, fuera de este repositorio |
 | ~~9~~ | ~~Aprobar el mecanismo de autorrevisión de requisición~~ · **RESUELTO 9-ago-2026, con tope.** Ver [[V10-ESQUEMA-SQL]] §19, migración 003 | — |
 | ~~10~~ | ~~Numeración de etapas inconsistente entre documentos~~ · **RESUELTO 9-ago-2026: gana `V10-CONCEPTO`, cuatro etapas.** Ver [[V10-PLAN-DE-TRABAJO-R02]] | — |
+| 11 | **Revisar si Prisma sigue fijo en 6.** Se fijó porque `@auth/prisma-adapter` no declaraba soporte para Prisma 7 — ver [[V10-ARQUITECTURA]] §1.1. El adapter se quitó ese mismo día (no hacía falta, con Credentials + JWT), así que la razón original ya no existe. **No subir todavía** — instrucción explícita de Stefanno el 9-ago-2026: revisar hasta que la rebanada 2 (catálogo técnico) esté terminada, para no correr un salto de mayor con el catálogo a medio construir | Revisar después de la rebanada 2 |
 
 ---
 
