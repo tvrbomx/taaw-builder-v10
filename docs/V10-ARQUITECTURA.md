@@ -107,6 +107,13 @@ vez** — es obligatorio, porque tres personas cubren ocho funciones.
 puede ser residencia en un proyecto y supervisión en otro. Los roles se definen en tabla,
 no en código: agregar uno no debe requerir un despliegue.
 
+**No existe, ni ahora ni después, un rol `CLIENTE`. Decisión de Stefanno, 9-ago-2026, no
+un olvido.** El cliente recibe documentos — folio, PDF, correo — y nunca entra a la
+aplicación. Se deja escrito aquí para que dentro de un año nadie lo agregue pensando que
+faltó: es exactamente lo que ya decía `V10-CONCEPTO-ParaQueEsLaApp-R02` §3 — *"Cliente ·
+Recibe documentos. No entra a la app"* — sólo que ahí vivía como dato de una tabla y no
+como regla explícita de la capa de roles.
+
 ---
 
 ## 5. Sistema de diseño

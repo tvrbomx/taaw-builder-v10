@@ -45,12 +45,29 @@ no fuente de verdad.
 
 ## Etapa actual
 
-**Anteproyecto. NO SE PROGRAMA.**
+**Etapa 4 · Ejecución. El anteproyecto (etapa 2) y el proyecto ejecutivo (etapa 3)
+cerraron el 9-ago-2026** — cuatro etapas, no dos: `V10-CONCEPTO-ParaQueEsLaApp-R02` §6.
+Los ocho documentos de `V10-PLAN-DE-TRABAJO-R02` están escritos y el esquema está
+**congelado desde el 8-ago-2026**, con las migraciones 001 a 003 aplicadas — ver
+`V10-ESQUEMA-SQL` §16.2 y §19.
 
-El siguiente entregable es `docs/V10-MODELO-DOMINIO.md`.
+**La rebanada 1 —arquitectura y sistema de diseño— es el primer código de la V10.**
 
-El código empieza cuando estén los seis documentos pendientes y el esquema esté congelado.
-Si te piden programar antes, dilo y explica por qué no conviene.
+---
+
+## Qué significa "esquema congelado"
+
+**No significa que no se pueda agregar nunca.** Significa que lo que ya existe no se
+toca. El detalle completo, con ejemplos, vive en `V10-ESQUEMA-SQL` §16.2. Regla corta:
+
+| Nivel | Se hace cómo |
+|---|---|
+| Tabla nueva, o columna en una tabla que no existía | **Migración aditiva. Adelante, se avisa después** |
+| Columna nueva en una tabla que ya existe hoy | **Se avisa y se aprueba antes** de escribir la migración |
+| Cambiar o quitar algo que ya existe | **Se detiene todo. No se parcha** |
+
+La distinción que importa es entre **agregar** y **tocar lo que ya está**. Agregar no
+puede romper una consulta que no sabe que lo nuevo existe; tocar sí puede.
 
 ---
 
@@ -147,8 +164,9 @@ Va a pasar. Es lo normal y no es un problema — **el problema es meterlo sin pe
    **no entra**: se anota como pendiente y se decide después
 2. Revisa si contradice alguna de las nueve reglas. Si la contradice, se replantea
    el requisito
-3. Si obliga a cambiar el esquema y el esquema ya está congelado, **se detiene todo**
-   y se avisa. No se parcha
+3. Si toca el esquema ya congelado, aplica la regla de "Qué significa esquema
+   congelado" de arriba: tabla nueva es aditiva, columna en tabla existente se avisa,
+   **cambiar o quitar algo existente se detiene todo y se avisa**
 4. Se documenta antes de programarse
 
 **Esto es exactamente lo que quebró a las dos versiones anteriores.**
@@ -214,10 +232,10 @@ Va a pasar. Es lo normal y no es un problema — **el problema es meterlo sin pe
 
 | # | Pendiente |
 |---|---|
-| 1 | **Formato de clave de concepto y de partida** — el prefijo y su lógica. Bloquea el esquema |
-| 2 | Aero cálido contra aero frío |
+| ~~1~~ | ~~Formato de clave de concepto y de partida~~ · **RESUELTO 8-ago-2026: `ALB-0072`.** Ver `V10-MODELO-DOMINIO` §2 |
+| ~~2~~ | ~~Aero cálido contra aero frío~~ · **RESUELTO 9-ago-2026: aero cálido.** Ver `V10-DISENO` §2 |
 | 3 | Las dos familias tipográficas |
-| 4 | Catálogo definitivo de categorías de gasto |
+| ~~4~~ | ~~Catálogo definitivo de categorías de gasto~~ · **RESUELTO 8-ago-2026** |
 | 5 | Logotipo de TAAW Builder y su relación con el de Dravya |
 
 ---

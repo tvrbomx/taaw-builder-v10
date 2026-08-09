@@ -1,6 +1,12 @@
 # TAAW V10 · PLAN DE TRABAJO
 
-**R02 · 7-ago-2026 · Etapa 2 de 4 · Anteproyecto**
+**R02 · 7-ago-2026 · Etapas 2 y 3 de 4 · Anteproyecto y Proyecto Ejecutivo · AMBAS
+CERRADAS el 9-ago-2026**
+
+> **Corrección de numeración, 9-ago-2026.** Este documento traía todo bajo una sola
+> "Etapa 2 · Anteproyecto". [[V10-CONCEPTO-ParaQueEsLaApp-R02]] §6 ya definía cuatro
+> etapas, y separaba proyecto ejecutivo del anteproyecto — gana esa numeración, la
+> original. La sección 2 de aquí en adelante distingue las dos.
 
 Documento raíz. De aquí cuelga todo lo demás.
 Vault de Obsidian: la carpeta `APP-V10`. Los enlaces `[[así]]` dibujan el grafo solos.
@@ -30,17 +36,40 @@ cómo se conecta. Si algo no está enlazado desde aquí, no está en el alcance.
 
 ## 2. Mapa de documentos
 
+**Etapa 1 · Conceptualización**
+
 | # | Documento | Qué resuelve | Estado |
 |---|---|---|---|
 | 0 | [[V10-CONCEPTO-ParaQueEsLaApp-R02]] | Manifiesto: qué es, para quién, qué no será | **Aprobado** |
+
+**Etapa 2 · Anteproyecto — CERRADA el 9-ago-2026**
+
+| # | Documento | Qué resuelve | Estado |
+|---|---|---|---|
 | 1 | **V10-PLAN-DE-TRABAJO-R02** | Este documento. Orden, rebanadas, criterios | **Vigente** |
-| 2 | [[V10-ARQUITECTURA]] | Stack, estructura, sistema de diseño, multiempresa | Siguiente |
-| 3 | [[V10-MODELO-DOMINIO]] | Entidades, relaciones, máquinas de estado, invariantes | Depende de 2 |
-| 4 | [[V10-ESQUEMA-SQL]] | Tablas, llaves, restricciones. El esquema que se congela | Depende de 3 |
-| 5 | [[V10-PLATAFORMA-Y-MIGRACION]] | Dónde vive la base, cómo migran los 877 conceptos | Depende de 4 |
-| 6 | [[V10-CATALOGO-DOCUMENTOS]] | Qué PDF emite cada entidad y con qué folio | Depende de 3 |
-| 7 | [[V10-PANTALLAS-Y-ROLES]] | Pantalla por pantalla, permiso por rol | Depende de 3 y 6 |
-| 8 | [[V10-API]] | Superficie de servicios | Depende de 4 y 7 |
+| 2 | [[V10-ARQUITECTURA]] | Stack, estructura, sistema de diseño, multiempresa | **Escrito** |
+| 3 | [[V10-MODELO-DOMINIO]] | Entidades, relaciones, máquinas de estado, invariantes | **Escrito** |
+| 4 | [[V10-ESQUEMA-SQL]] | Tablas, llaves, restricciones. El esquema que se congela | **APROBADO Y CONGELADO** 8-ago-2026 · migraciones 001-003 |
+| 5 | [[V10-PLATAFORMA-Y-MIGRACION]] | Dónde vive la base, frontera de almacenamiento, qué migra de la V8 y del presupuesto real de F-19 | **Escrito** 8-ago-2026 |
+
+**Etapa 3 · Proyecto ejecutivo — CERRADA el 9-ago-2026**
+
+| # | Documento | Qué resuelve | Estado |
+|---|---|---|---|
+| 6 | [[V10-CATALOGO-DOCUMENTOS]] | Qué PDF emite cada entidad y con qué folio | **Escrito** 8-ago-2026 · 31 documentos |
+| 7 | [[V10-PANTALLAS-Y-ROLES]] | Pantalla por pantalla, permiso por rol | **Escrito** 8-ago-2026 · 34 pantallas |
+| 8 | [[V10-API]] | Superficie de servicios | **Escrito** 9-ago-2026 — cierra la etapa 3 |
+
+**Etapa 4 · Ejecución — empieza con la rebanada 1**
+
+| # | Documento | Qué resuelve | Estado |
+|---|---|---|---|
+| — | Rebanadas 1 a 9, más abajo en este mapa | El código | Rebanada 1, en curso |
+
+**Sin etapa numerada — insumo transversal, leído por las de arriba**
+
+| # | Documento | Qué resuelve | Estado |
+|---|---|---|---|
 | 9 | [[V10-REQ-CicloDeObra-Cobranza-Bitacora-R01]] | Requisito funcional del ciclo de obra | **Escrito** |
 | 10 | [[SAT-ELECTRICO-CONCEPTO]] | App satélite de cálculo eléctrico | **Escrito** |
 
@@ -168,8 +197,8 @@ tiene que existir antes que lo que se cuelga de él.
 | **Entidades** | `empresa`, `grupo_empresa`, `preferencia_usuario`, `integracion` |
 | **Pantallas** | Administración de empresas · Preferencias del usuario · Integraciones |
 | **Funciones de empresa** | Alta de empresas del grupo · Logotipo, nombre, correos, datos fiscales, **disclaimers y pies de página de los documentos** · Plantillas de documento por empresa |
-| **Funciones de usuario** | Tema claro y oscuro · Tamaño de fuente y densidad · Idioma · Notificaciones y alertas |
-| **Integraciones** | Conexión con modelos de IA · Conectores y MCP · Respaldo y exportación de la base |
+| **Funciones de usuario** | Tema claro y oscuro · Tamaño de fuente y densidad · Idioma · **Alertas dentro de la app — campana con pendientes por rol.** Correo y WhatsApp quedan anotados aquí como posibles, no comprometidos — decisión de Stefanno, 9-ago-2026 |
+| **Integraciones** | **Lectura de cotizaciones de proveedor en PDF con IA**, alcance concreto: extraer conceptos, cantidades y precios para alimentar una requisición o una tarjeta sin captura manual — decisión de Stefanno, 9-ago-2026. No es "integración de IA" genérica · Conectores y MCP · Respaldo y exportación de la base |
 | **Terminado cuando** | Se da de alta una empresa nueva, se le pone su logo y sus disclaimers, y sus documentos salen con su identidad sin tocar código |
 
 > Los **tokens de tema** viven en la rebanada 1. Aquí sólo vive el interruptor que los
@@ -234,7 +263,9 @@ el ahorro que hoy no se ve.
 
 ## 7. Plataforma · propuesta
 
-**Condición dura: costo cero.** Se detalla en [[V10-PLATAFORMA-Y-MIGRACION]].
+**Condición dura: costo cero.** Detallado en [[V10-PLATAFORMA-Y-MIGRACION]]: variables de
+entorno, mecánica de respaldo, y la frontera entre el volumen de TAAW Builder y el CDE
+de planos en la nube.
 
 - **PostgreSQL.** Es lo único que da integridad referencial real: clave única de concepto,
   llave foránea de gasto a concepto, transacciones. Exactamente lo que Sheets no puede
@@ -254,7 +285,7 @@ el ahorro que hoy no se ve.
 | Etapa | Qué se necesita |
 |---|---|
 | Arquitectura | Aprobar la paleta y la tipografía de la app · Confirmar las empresas del grupo |
-| Modelo de dominio | Formato definitivo de clave de concepto · Catálogo de categorías de gasto · Quién autoriza cada transición |
+| Modelo de dominio | ~~Formato definitivo de clave de concepto~~ **resuelto 8-ago-2026: `ALB-0072`** · Catálogo de categorías de gasto · Quién autoriza cada transición |
 | Plataforma | Elegir entre servicio gratuito o servidor propio, con la comparación en mano |
 | Cada rebanada | Probarla con datos reales de F-19 antes de pasar a la siguiente |
 
@@ -270,4 +301,12 @@ adelante la app y el Excel corren en paralelo, como quedó decidido.
 
 ---
 
-*Etapa 2 de 4. El siguiente documento es [[V10-ARQUITECTURA]].*
+*Las etapas 2 y 3 están cerradas. Los ocho documentos de este mapa están escritos, el
+esquema está congelado desde el 8-ago-2026 con las migraciones 001 a 003 aplicadas, y
+[[V10-API]] cerró la etapa 3 el 9-ago-2026. La analogía con un proyecto de arquitectura
+se sostiene: el anteproyecto definió la estructura — el modelo de dominio, el esquema,
+la plataforma. El proyecto ejecutivo definió el detalle con el que se construye — los
+documentos, las pantallas, la API.
+
+**Empieza la etapa 4 · Ejecución.** La rebanada 1 —arquitectura y sistema de diseño— es
+el primer código de la V10.*

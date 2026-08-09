@@ -32,15 +32,14 @@ el fondo respira, los paneles de vidrio lo dejan ver, y la información vive enc
 Frutiger Aero clásico es acuático: azules, verdes, agua, cielo.
 La marca de Dravya es cálida: hueso y cafés.
 
-**Propuesta: aero cálido.** Se conserva toda la estructura —vidrio, profundidad, brillo,
-fondos atmosféricos— pero la temperatura es la de la marca. Fondos de luz cálida, piedra,
-madera, arena, atardecer. Vidrio ámbar en vez de vidrio azul.
+**Aero cálido. Aprobado por Stefanno el 9-ago-2026.** Se conserva toda la estructura
+—vidrio, profundidad, brillo, fondos atmosféricos— pero la temperatura es la de la
+marca: hueso y cafés. Fondos de luz cálida, piedra, madera, arena, atardecer. Vidrio
+ámbar en vez de vidrio azul.
 
 Así la aplicación y el hub informativo se sienten de la misma casa, y la marca no se
-diluye en una moda.
-
-> **Pendiente de aprobación de Stefanno.** La alternativa es irse al aero frío clásico y
-> reservar el hueso y café sólo para el hub. Se decide antes de la rebanada 1.
+diluye en una moda. La alternativa —aero frío clásico, reservando hueso y café sólo para
+el hub— queda descartada.
 
 ---
 
