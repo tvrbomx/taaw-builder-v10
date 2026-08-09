@@ -1,0 +1,53 @@
+{
+  "name": "taaw-builder-v10",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 4010",
+    "build": "next build",
+    "start": "next start -p 4010",
+    "lint": "eslint",
+    "test": "vitest run",
+    "db:migrar": "bash scripts/db-migrar.sh",
+    "db:pull": "prisma db pull",
+    "db:generar": "prisma generate",
+    "db:sembrar": "node scripts/sembrar-verificacion.mjs"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "5.7.1",
+    "@prisma/client": "6.19.3",
+    "@react-pdf/renderer": "4.6.0",
+    "bcryptjs": "3.0.3",
+    "date-fns": "4.4.0",
+    "idb": "8.0.3",
+    "next": "15.5.23",
+    "next-auth": "5.0.0-beta.32",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "react-hook-form": "7.85.0",
+    "sharp": "0.35.3",
+    "ulid": "3.0.2",
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "4.3.3",
+    "@types/node": "26.2.0",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.4",
+    "@vitejs/plugin-react": "6.0.5",
+    "eslint": "9.39.5",
+    "eslint-config-next": "15.5.23",
+    "prisma": "6.19.3",
+    "tailwindcss": "4.3.3",
+    "typescript": "5.9.3",
+    "vitest": "4.1.10"
+  },
+  "allowScripts": {
+    "@prisma/client@6.19.3": true,
+    "prisma@6.19.3": true,
+    "sharp@0.34.5": true,
+    "sharp@0.35.3": true,
+    "@prisma/engines@6.19.3": true,
+    "unrs-resolver@1.12.2": true
+  }
+}

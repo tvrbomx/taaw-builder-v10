@@ -1,0 +1,127 @@
+@import "tailwindcss";
+@import "../ui/tokens/tokens.css";
+
+/**
+ * Tailwind lee de las variables de tokens.css — nunca al revés.
+ * Un color nuevo se agrega en tokens.css, jamás aquí ni en una pantalla.
+ */
+@theme inline {
+  --color-fondo-imagen: var(--fondo-imagen);
+  --color-vidrio: var(--vidrio);
+  --color-vidrio-elevado: var(--vidrio-elevado);
+  --color-vidrio-borde: var(--vidrio-borde);
+
+  --color-texto: var(--texto);
+  --color-texto-tenue: var(--texto-tenue);
+  --color-texto-inverso: var(--texto-inverso);
+
+  --color-acento: var(--acento);
+  --color-acento-tenue: var(--acento-tenue);
+  --color-positivo: var(--positivo);
+  --color-atencion: var(--atencion);
+  --color-negativo: var(--negativo);
+
+  --radius-chico: var(--radio-chico);
+  --radius-DEFAULT: var(--radio);
+  --radius-grande: var(--radio-grande);
+
+  --font-cuerpo: var(--fuente-cuerpo);
+  --font-display: var(--fuente-display);
+  --font-mono: var(--fuente-mono);
+
+  /* La escala numérica de Tailwind (p-1, gap-4, m-8…) se genera
+     multiplicando esta base — 4px, el mismo --espacio-1 de tokens.css.
+     Así p-6 = 24px = --espacio-6 sin duplicar la escala dos veces. */
+  --spacing: var(--espacio-1);
+}
+
+body {
+  background: var(--fondo-imagen);
+  color: var(--texto);
+  font-family: var(--fuente-cuerpo);
+  font-size: var(--tamano-base);
+  line-height: var(--interlineado-cuerpo);
+  min-height: 100dvh;
+}
+
+/* ---------- tipografía — V10-DISENO §5 ---------- */
+
+.titulo-pantalla {
+  font-family: var(--fuente-display);
+  font-size: var(--tipo-titulo-pantalla-tamano);
+  font-weight: var(--tipo-titulo-pantalla-peso);
+  line-height: 1.15;
+  font-variation-settings: "SOFT" 30, "opsz" 40;
+}
+
+.titulo-seccion {
+  font-family: var(--fuente-display);
+  font-size: var(--tipo-titulo-seccion-tamano);
+  font-weight: var(--tipo-titulo-seccion-peso);
+  line-height: 1.2;
+  font-variation-settings: "SOFT" 20, "opsz" 28;
+}
+
+.subtitulo {
+  font-size: var(--tipo-subtitulo-tamano);
+  font-weight: var(--tipo-subtitulo-peso);
+}
+
+.texto-secundario {
+  font-size: var(--tipo-secundario-tamano);
+  color: var(--texto-tenue);
+}
+
+.etiqueta {
+  font-size: var(--tipo-etiqueta-tamano);
+  text-transform: uppercase;
+  letter-spacing: var(--tipo-etiqueta-espaciado);
+  font-weight: 500;
+  color: var(--texto-tenue);
+}
+
+.texto-mono {
+  font-family: var(--fuente-mono);
+  font-size: var(--tipo-mono-tamano);
+}
+
+.cifras-tabulares {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- vidrio — V10-DISENO §2 y §4 ----------
+   Translúcido, con desenfoque, y un filo luminoso en el borde superior
+   que es lo que de verdad lee como "vidrio" y no como panel plano con
+   opacidad. */
+
+.superficie-vidrio {
+  position: relative;
+  background: var(--vidrio);
+  backdrop-filter: blur(var(--vidrio-blur)) saturate(1.15);
+  -webkit-backdrop-filter: blur(var(--vidrio-blur)) saturate(1.15);
+  border: 1px solid var(--vidrio-borde);
+  border-radius: var(--radio);
+  box-shadow:
+    var(--sombra),
+    inset 0 1px 0 0 var(--vidrio-filo);
+}
+
+.superficie-vidrio-elevada {
+  position: relative;
+  background: var(--vidrio-elevado);
+  backdrop-filter: blur(var(--vidrio-blur)) saturate(1.15);
+  -webkit-backdrop-filter: blur(var(--vidrio-blur)) saturate(1.15);
+  border: 1px solid var(--vidrio-borde);
+  border-radius: var(--radio-grande);
+  box-shadow:
+    var(--sombra-elevada),
+    inset 0 1px 0 0 var(--vidrio-filo);
+}
+
+/* ---------- foco — se navega con teclado, V10-DISENO §8 ---------- */
+
+:focus-visible {
+  outline: 2px solid var(--acento);
+  outline-offset: 2px;
+  border-radius: var(--radio-chico);
+}

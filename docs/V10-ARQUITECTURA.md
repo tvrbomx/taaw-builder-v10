@@ -23,6 +23,41 @@ después rompe la aplicación al intentar agregarlo. Es la rebanada 1.
 dato inválido, no tiene llaves foráneas, no tiene transacciones. Los 877 conceptos con
 40 formatos de ID son consecuencia directa de eso.
 
+### 1.1 Versiones exactas — rebanada 1 · 9-ago-2026
+
+Todo `package.json` fija versión exacta, nunca rango ni `@latest`. Cada desviación de
+"la última disponible" tiene una razón verificada contra el registro real de npm o
+contra un `npm install` real, no una preferencia.
+
+| Paquete | Versión fija | Por qué |
+|---|---|---|
+| Node | **22** | LTS activo al momento de arrancar la rebanada |
+| Next.js | **15.5.23** | Aprobado en 15. `create-next-app@latest` instaló 16.3.0 — corregido de vuelta a la última 15.x estable, no a la última disponible |
+| React / react-dom | **19.2.8** | La que trae Next 15.5.23 como peer |
+| TypeScript | **5.9.3**, no 7 | `create-next-app` resolvió `^5`; la 7.0.2 (dos mayores de salto) no tiene señal de compatibilidad verificada con las herramientas de Next 15.5.23 |
+| Prisma / @prisma/client | **6.19.3**, no 7 | Al fijarse, `@auth/prisma-adapter@2.11.3` sólo declaraba soporte de peer hasta `@prisma/client >=6`, no `>=7` — verificado con `npm view`. El adapter se quitó después (ver abajo); revisar si sigue habiendo razón para no subir a 7 cuando se necesite |
+| Tailwind CSS | **4.3.3** | Lee variables CSS de `tokens.css`, nunca al revés — V10-DISENO |
+| next-auth (Auth.js) | **5.0.0-beta.32**, versión fija, nunca `@beta` flotante | Auth.js v5 sigue en beta en el registro; se fija el número exacto para que nunca se mueva solo — un `@beta` sin número puede cambiar de versión en cualquier `npm install` |
+| eslint | **9.39.5**, no 10 | `eslint-config-next@15.5.23` declara peer `eslint: ^7\|\|^8\|\|^9` — un `npm install` real con eslint 10 dio ERESOLVE |
+| zod | **4.4.3** | `@hookform/resolvers@5.7.1` declara soporte de Zod 4 |
+| react-hook-form | **7.85.0** | validación `onBlur`, nunca `onSubmit` — V10-DISENO §7 |
+| date-fns | **4.4.0** | agregada por instrucción explícita: el proyecto entero son fechas (cronograma, semanas, cortes de cobranza, vigencias) y no había biblioteca para manejarlas — la fecha nativa a pelo es "justo donde se cometen errores que nadie nota hasta que la cobranza cae en la semana equivocada" |
+| idb | **8.0.3** | cola offline sobre IndexedDB — V10-PANTALLAS-Y-ROLES §5 |
+| ulid | **3.0.2** | formato universal de llave primaria del esquema |
+| sharp | **0.35.3** | procesamiento de fotos de bitácora |
+| @react-pdf/renderer | **4.6.0** | ya se usaba en la V8 y funciona |
+| bcryptjs | **3.0.3** | **no estaba en la lista aprobada originalmente** — se agregó al escribir `services/auth/auth.ts`: hacía falta verificar contraseña contra `usuario.hash_password` y no había ninguna biblioteca de hashing en el stack |
+| vitest | **4.1.10** | pruebas mínimas — V10-ARQUITECTURA §9 |
+
+**`@auth/prisma-adapter` — agregado y luego quitado, el mismo día.** Se instaló
+siguiendo el patrón usual de Auth.js con Prisma, y se quitó al notar que espera el
+esquema propio de NextAuth (`User`, `Account`, `Session`, `VerificationToken`), que no
+existe en esta base — el esquema usa `usuario`, sin esas otras tres tablas — y que
+además es innecesario: con Credentials y sesión JWT no hay cuenta OAuth que enlazar ni
+sesión que guardar en base. `npm uninstall @auth/prisma-adapter` corrido el mismo día
+que se instaló. Con el adapter fuera, la razón original para fijar Prisma en 6 (arriba)
+ya no aplica — queda anotado para revisar cuando haga falta subir a Prisma 7.
+
 ---
 
 ## 2. Estructura de carpetas

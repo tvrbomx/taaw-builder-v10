@@ -73,6 +73,11 @@ Relación 16:9, alta resolución.
 Variantes por módulo cambiando la temperatura y el motivo: catálogo más neutro,
 obra más terroso, dinero más ámbar, junta más luminoso.
 
+**El sistema ya existe en código, rebanada 1** (`FondoModulo.tsx`, tokens
+`fondo-modulo-*`): un degradado de marcador de posición por módulo, versión clara y
+oscura, y el interruptor de preferencias para desactivarlo. Faltan las imágenes reales
+— cuando existan, entran en el mismo token, sin tocar ninguna pantalla.
+
 ---
 
 ## 4. Tokens
@@ -81,39 +86,71 @@ Todo vive en un solo archivo. Ninguna pantalla escribe un color literal.
 
 ### Superficie y vidrio
 
-- `fondo-imagen` — el fondo atmosférico del módulo
+- `fondo-imagen` — el fondo atmosférico activo (lo resuelve `fondo-modulo-*`, abajo)
+- `fondo-liso` — para quien desactiva el fondo atmosférico desde preferencias
+- `fondo-modulo-*` — un valor por módulo (`proyectos`, `catalogo`, `obra`, `dinero`,
+  `junta`); hoy son degradados de marcador de posición, mismo nombre cuando entren las
+  imágenes generadas por IA — implementado en `FondoModulo.tsx`, rebanada 1
 - `vidrio` — panel translúcido con desenfoque. Es la superficie principal
-- `vidrio-elevado` — para lo que flota encima: menús, diálogos
-- `vidrio-borde` — el filo luminoso que le da el brillo característico
+- `vidrio-elevado` — para lo que flota encima: menús, diálogos, encabezado fijo de tabla
+- `vidrio-borde` — el borde, sutil
+- `vidrio-filo` — el reflejo interior en el borde superior, lo que de verdad lee como
+  vidrio y no como panel plano con opacidad — implementado como `inset` en
+  `.superficie-vidrio`
 
 ### Texto
 
 - `texto` · `texto-tenue` · `texto-inverso`
+- `fuente-display` (Fraunces) · `fuente-cuerpo` (Inter) · `fuente-mono` (JetBrains Mono)
+  — ver §5
+- `tipo-*` — la escala tipográfica completa, ver §5
 
 ### Acento y estado
 
 - `acento` · `acento-tenue`
 - `positivo` · `atencion` · `negativo` — **sólo para estados reales, nunca para decorar**
+- El foco de teclado usa `acento` — `:focus-visible` en `globals.css`, nunca el foco
+  por omisión del navegador
 
 ### Forma
 
 - Radios generosos. El aero es redondo, no anguloso
 - Sombras difusas y amplias, nunca duras
-- Espaciado abundante. La interfaz respira
+- Espaciado abundante — escala en `--espacio-*`: 4, 8, 12, 16, 24, 32, 48, 64px,
+  la misma que consume Tailwind vía `--spacing` en `globals.css`
 
 ---
 
 ## 5. Tipografía
 
-| Uso | Tipo |
-|---|---|
-| Títulos de sección | Display con carácter, tamaño grande y confiado |
-| Cuerpo | Sans limpia, 16 a 18 px, interlineado generoso |
-| Claves, folios y códigos | Monoespaciada. Siempre |
-| Números de dinero | Tabular, para que las columnas alineen |
+**RESUELTO 9-ago-2026** — pendiente #2 de §10. Tres familias, las tres libres, en
+Google Fonts, con soporte completo de español, cargadas con `next/font` para que no
+haya parpadeo ni petición externa:
 
-La jerarquía la marca **el tamaño y el aire**, no las cajas ni los colores.
-Tamaño ajustable por el usuario sin que se rompa nada.
+| Uso | Familia | Por qué |
+|---|---|---|
+| Display — títulos de sección y encabezados | **Fraunces** | tiene ejes variables de suavidad y peso: cálida y con carácter, lo que pide el aero cálido, no una display genérica |
+| Cuerpo — todo el texto, tablas, formularios | **Inter** | aguanta tablas densas sin cansar la vista |
+| Mono — claves, folios, códigos, montos | **JetBrains Mono** | monoespaciada, pensada para lectura de datos, no de código a secas |
+
+### Escala
+
+Vive en tokens (`--tipo-*` en `tokens.css`), nunca suelta por pantalla:
+
+| Nivel | Tamaño | Familia | Peso |
+|---|---|---|---|
+| Título de pantalla | 32–40px | Fraunces | alto |
+| Título de sección | 24px | Fraunces | alto |
+| Subtítulo | 18px | Inter | medio |
+| Cuerpo | 16px, interlineado 1.6 | Inter | normal |
+| Secundario | 14px, color texto-tenue | Inter | normal |
+| Etiqueta | 13px, mayúsculas, espaciado amplio | Inter | medio |
+| Mono | 14px | JetBrains Mono | normal |
+
+La jerarquía la marca **el tamaño y el aire**, nunca la negrita ni el color — si dos
+niveles sólo se distinguen por negrita, están mal. Números de dinero: cifras
+tabulares, para que las columnas alineen. Tamaño ajustable por el usuario sin que se
+rompa nada.
 
 ---
 
@@ -183,9 +220,9 @@ Cuando se apruebe la dirección de este documento, el hub se ajusta para alinear
 
 | # | Pendiente |
 |---|---|
-| 1 | Aprobar *aero cálido* contra *aero frío* |
-| 2 | Elegir las dos familias tipográficas |
-| 3 | Generar el juego de fondos por módulo, claro y oscuro |
+| ~~1~~ | ~~Aprobar *aero cálido* contra *aero frío*~~ · **RESUELTO 9-ago-2026: aero cálido** |
+| ~~2~~ | ~~Elegir las dos familias tipográficas~~ · **RESUELTO 9-ago-2026: Fraunces, Inter y JetBrains Mono — ver §5** |
+| 3 | Generar el juego de fondos por módulo, claro y oscuro — el sistema de tokens y el degradado de marcador de posición ya están (rebanada 1, §3); faltan las imágenes reales |
 | 4 | Definir el logotipo de TAAW Builder y su relación con el de Dravya |
 
 ---

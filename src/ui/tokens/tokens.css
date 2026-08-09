@@ -1,0 +1,135 @@
+/**
+ * Tokens del sistema de diseño — V10-DISENO. Aero cálido, aprobado 9-ago-2026.
+ * Ninguna pantalla escribe un color, radio o sombra literal. Todo sale de aquí.
+ * Cambiar el tema es cambiar este archivo, nada más — V10-ARQUITECTURA §5.
+ */
+
+:root {
+  /* ---------- superficie y vidrio, claro ---------- */
+  --fondo-imagen: linear-gradient(160deg, #f7f1e8 0%, #ecdfc9 55%, #e4d2ad 100%);
+  --fondo-liso: #f2ead9;
+  --vidrio: rgba(255, 250, 240, 0.62);
+  --vidrio-elevado: rgba(255, 250, 240, 0.82);
+  --vidrio-borde: rgba(196, 154, 90, 0.35);
+  --vidrio-filo: rgba(255, 255, 255, 0.55);
+  --vidrio-blur: 18px;
+
+  /* ---------- fondos por módulo — V10-DISENO §3 ----------
+     MARCADOR DE POSICIÓN: degradados, no las imágenes generadas por IA
+     que pide el documento. Mismo nombre de token cuando lleguen las
+     imágenes reales — sólo cambia el valor, ninguna pantalla se toca. */
+  --fondo-modulo-proyectos: var(--fondo-imagen);
+  --fondo-modulo-catalogo: linear-gradient(160deg, #f5f0e6 0%, #e9e2d2 55%, #ddd3ba 100%);
+  --fondo-modulo-obra: linear-gradient(160deg, #efe4d0 0%, #ddc9a3 50%, #c7a876 100%);
+  --fondo-modulo-dinero: linear-gradient(160deg, #f7ecd8 0%, #eccf9a 55%, #dcae5e 100%);
+  --fondo-modulo-junta: linear-gradient(160deg, #fdf8ee 0%, #f6e9cd 50%, #eeda9f 100%);
+
+  /* ---------- texto ---------- */
+  --texto: #2c2013;
+  --texto-tenue: #6b5b42;
+  --texto-inverso: #fbf6ec;
+
+  /* ---------- acento y estado ---------- */
+  --acento: #b5762f;
+  --acento-tenue: #e8c99a;
+  --positivo: #4f7a4a;
+  --atencion: #b8862c;
+  --negativo: #a4432f;
+
+  /* ---------- forma ---------- */
+  --radio-chico: 10px;
+  --radio: 16px;
+  --radio-grande: 24px;
+  --sombra: 0 8px 30px -8px rgba(90, 62, 20, 0.25);
+  --sombra-elevada: 0 16px 48px -12px rgba(90, 62, 20, 0.35);
+
+  /* ---------- espacio — 4, 8, 12, 16, 24, 32, 48, 64 ---------- */
+  --espacio-1: 4px;
+  --espacio-2: 8px;
+  --espacio-3: 12px;
+  --espacio-4: 16px;
+  --espacio-6: 24px;
+  --espacio-8: 32px;
+  --espacio-12: 48px;
+  --espacio-16: 64px;
+
+  /* ---------- tipografía — V10-DISENO §5, resuelto 9-ago-2026 ----------
+     Las variables --font-* las define next/font en layout.tsx; aquí sólo
+     se arma la pila de respaldo. */
+  --fuente-display: var(--font-fraunces), Georgia, serif;
+  --fuente-cuerpo: var(--font-inter), system-ui, -apple-system, "Segoe UI", sans-serif;
+  --fuente-mono: var(--font-jetbrains-mono), ui-monospace, "SF Mono", Menlo, monospace;
+  --tamano-base: 16px;
+  --interlineado-cuerpo: 1.6;
+
+  /* escala tipográfica — la jerarquía es tamaño y aire, nunca negrita */
+  --tipo-titulo-pantalla-tamano: clamp(32px, 4vw, 40px);
+  --tipo-titulo-pantalla-peso: 600;
+  --tipo-titulo-seccion-tamano: 24px;
+  --tipo-titulo-seccion-peso: 600;
+  --tipo-subtitulo-tamano: 18px;
+  --tipo-subtitulo-peso: 500;
+  --tipo-cuerpo-tamano: 16px;
+  --tipo-secundario-tamano: 14px;
+  --tipo-etiqueta-tamano: 13px;
+  --tipo-etiqueta-espaciado: 0.06em;
+  --tipo-mono-tamano: 14px;
+}
+
+/* En oscuro el vidrio se densifica y el fondo baja de luminosidad,
+   pero conserva la temperatura — V10-DISENO §6. Nunca negro plano. */
+:root[data-theme="dark"] {
+  --fondo-imagen: linear-gradient(160deg, #241b10 0%, #1c150c 55%, #150f08 100%);
+  --fondo-liso: #1c150c;
+  --vidrio: rgba(40, 30, 18, 0.66);
+  --vidrio-elevado: rgba(50, 38, 22, 0.86);
+  --vidrio-borde: rgba(196, 154, 90, 0.22);
+  --vidrio-filo: rgba(255, 221, 170, 0.14);
+
+  --fondo-modulo-proyectos: var(--fondo-imagen);
+  --fondo-modulo-catalogo: linear-gradient(160deg, #201a10 0%, #1a150c 55%, #130f08 100%);
+  --fondo-modulo-obra: linear-gradient(160deg, #241c10 0%, #1e160b 50%, #170f06 100%);
+  --fondo-modulo-dinero: linear-gradient(160deg, #2a1f0e 0%, #21170a 50%, #1a1006 100%);
+  --fondo-modulo-junta: linear-gradient(160deg, #2e2415 0%, #251c0e 50%, #1c1508 100%);
+
+  --texto: #f3e9d8;
+  --texto-tenue: #c7b696;
+  --texto-inverso: #241b10;
+
+  --acento: #d99a4e;
+  --acento-tenue: #4a3820;
+  --positivo: #7fae76;
+  --atencion: #dcaa54;
+  --negativo: #d97a5f;
+
+  --sombra: 0 8px 30px -8px rgba(0, 0, 0, 0.5);
+  --sombra-elevada: 0 16px 48px -12px rgba(0, 0, 0, 0.6);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --fondo-imagen: linear-gradient(160deg, #241b10 0%, #1c150c 55%, #150f08 100%);
+    --fondo-liso: #1c150c;
+    --vidrio: rgba(40, 30, 18, 0.66);
+    --vidrio-elevado: rgba(50, 38, 22, 0.86);
+    --vidrio-borde: rgba(196, 154, 90, 0.22);
+    --vidrio-filo: rgba(255, 221, 170, 0.14);
+
+    --fondo-modulo-proyectos: var(--fondo-imagen);
+    --fondo-modulo-catalogo: linear-gradient(160deg, #201a10 0%, #1a150c 55%, #130f08 100%);
+    --fondo-modulo-obra: linear-gradient(160deg, #241c10 0%, #1e160b 50%, #170f06 100%);
+    --fondo-modulo-dinero: linear-gradient(160deg, #2a1f0e 0%, #21170a 50%, #1a1006 100%);
+    --fondo-modulo-junta: linear-gradient(160deg, #2e2415 0%, #251c0e 50%, #1c1508 100%);
+
+    --texto: #f3e9d8;
+    --texto-tenue: #c7b696;
+    --texto-inverso: #241b10;
+    --acento: #d99a4e;
+    --acento-tenue: #4a3820;
+    --positivo: #7fae76;
+    --atencion: #dcaa54;
+    --negativo: #d97a5f;
+    --sombra: 0 8px 30px -8px rgba(0, 0, 0, 0.5);
+    --sombra-elevada: 0 16px 48px -12px rgba(0, 0, 0, 0.6);
+  }
+}

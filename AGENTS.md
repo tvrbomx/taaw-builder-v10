@@ -234,7 +234,7 @@ Va a pasar. Es lo normal y no es un problema — **el problema es meterlo sin pe
 |---|---|
 | ~~1~~ | ~~Formato de clave de concepto y de partida~~ · **RESUELTO 8-ago-2026: `ALB-0072`.** Ver `V10-MODELO-DOMINIO` §2 |
 | ~~2~~ | ~~Aero cálido contra aero frío~~ · **RESUELTO 9-ago-2026: aero cálido.** Ver `V10-DISENO` §2 |
-| 3 | Las dos familias tipográficas |
+| ~~3~~ | ~~Las dos familias tipográficas~~ · **RESUELTO 9-ago-2026: Fraunces, Inter y JetBrains Mono.** Ver `V10-DISENO` §5 |
 | ~~4~~ | ~~Catálogo definitivo de categorías de gasto~~ · **RESUELTO 8-ago-2026** |
 | 5 | Logotipo de TAAW Builder y su relación con el de Dravya |
 

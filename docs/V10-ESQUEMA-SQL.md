@@ -552,25 +552,62 @@ create table documento (
   archivo       text,
   iva_pct       numeric(7,4) not null,
 
-  folio text generated always as (
-    coalesce(
-      (select p.clave from proyecto p where p.id = proyecto_id), 'EMP'
-    ) || '-' || creador  || '-' || progreso || '-' || funcion
-      || '-' || bloque || bloque_num || '-' || nivel || '-' || tipo
-      || '-' || lpad(numero::text, 3, '0')
-      || '-' || lpad(revision::text, 2, '0')
-      || '-' || estado
-  ) stored,
+  proyecto_clave varchar(4),   -- corrección 9-ago-2026 · calculada por trigger, nunca a mano
+  folio          text,          -- corrección 9-ago-2026 · calculada por trigger, nunca a mano
 
   constraint uq_documento_folio unique (empresa_id, proyecto_id, tipo, numero, revision),
   constraint ck_documento_revision check (revision >= 0 and revision <= 99),
   constraint ck_documento_numero   check (numero >= 1 and numero <= 999999)
 );
+
+-- corrección 9-ago-2026, verificada contra Postgres real, no supuesta:
+--   1. GENERATED ALWAYS no admite subconsulta — proyecto_clave se necesitaba por eso
+--   2. GENERATED ALWAYS tampoco admite un enum en la expresión, ni con cast explícito
+--      a texto — es una restricción de Postgres, reproducida con un caso mínimo antes
+--      de aceptar que era real. Con las dos, una columna generada dejó de alcanzar.
+-- El trigger reemplaza a la columna generada por completo: calcula proyecto_clave Y
+-- folio juntos, antes de cada insert o update de cualquiera de sus partes.
+create function fn_documento_folio() returns trigger as $$
+begin
+  if new.proyecto_id is not null then
+    select clave into new.proyecto_clave from proyecto where id = new.proyecto_id;
+  else
+    new.proyecto_clave := 'EMP';
+  end if;
+
+  new.folio :=
+    coalesce(new.proyecto_clave, 'EMP')
+      || '-' || new.creador  || '-' || new.progreso::text || '-' || new.funcion
+      || '-' || new.bloque || new.bloque_num || '-' || new.nivel || '-' || new.tipo
+      || '-' || lpad(new.numero::text, 3, '0')
+      || '-' || lpad(new.revision::text, 2, '0')
+      || '-' || new.estado::text;
+
+  return new;
+end;
+$$ language plpgsql;
+
+create trigger tg_documento_folio
+  before insert or update of proyecto_id, creador, progreso, funcion, bloque,
+    bloque_num, nivel, tipo, numero, revision, estado on documento
+  for each row execute function fn_documento_folio();
 ```
 
 **El folio se compone, no se escribe.** Los once campos de
-`DRAVYA-NOM-NomenclaturaDocumental-R01` son columnas, y el folio es una columna generada:
-no puede quedar desincronizado de sus partes, porque no es una copia.
+`DRAVYA-NOM-NomenclaturaDocumental-R01` son columnas, y `folio` se recalcula por trigger
+en cuanto cualquiera de ellas cambia: no puede quedar desincronizado de sus partes,
+porque nunca es una copia que alguien escriba — es imposible insertarlo o modificarlo a
+mano, el trigger lo pisa siempre antes de que la fila se guarde.
+
+**Corrección del 9-ago-2026, encontrada al aplicar el esquema contra Postgres real, no
+al leerlo — dos veces, no una.** La versión original usaba una columna `generated always`
+con una subconsulta a `proyecto` dentro: Postgres la rechaza, una columna generada sólo
+lee su propia fila. Corregido eso con `proyecto_clave`, apareció un segundo rechazo:
+**Postgres tampoco permite un `enum` dentro de una expresión generada**, con cast
+explícito a texto o sin él — se comprobó con un caso mínimo antes de aceptarlo como
+real, no se asumió. `estado` y `progreso` son enums. Con las dos restricciones juntas,
+una columna generada ya no alcanzaba, y el trigger la sustituye por completo: calcula
+`proyecto_clave` y `folio` en el mismo paso, antes de guardar la fila.
 
 `iva_pct` se guarda **en el documento** y no se lee de la empresa al imprimir: un
 presupuesto emitido con IVA 0 tiene que seguir diciendo 0 dentro de dos años, aunque la
@@ -1196,6 +1233,7 @@ al cerrar la transacción y no a la mitad de una escritura de varios renglones.
 | `tg_tarjeta_no_porcentual` | crear tarjeta para un concepto porcentual: no hay insumos que sumar |
 | `tg_variante_mismo_tipo_precio` | que una variante sea porcentual y su padre fijo, o al revés |
 | `tg_requisicion_autorrevision_tope` | migración 003, §19 · que una autorrevisión se guarde con `importe` mayor al `monto_maximo_autorrevision` de la empresa |
+| `tg_documento_folio` | corrección 9-ago-2026 · que `folio` o `proyecto_clave` queden desincronizados de las columnas que los componen. No es un `CHECK`: **calcula** el valor, no impide uno — el folio no se puede escribir a mano ni por accidente |
 
 ### Un concepto dado de baja que ya está en un presupuesto emitido
 
@@ -1382,14 +1420,37 @@ Dos barreras:
 **Primera · el repositorio.** Es la única capa que habla con Prisma y aplica el filtro
 siempre. La pantalla no se entera.
 
-**Segunda · política de fila en PostgreSQL.**
+**Segunda · política de fila en PostgreSQL, en las 38 tablas que tienen `empresa_id` —
+no sólo en `concepto`.** La primera versión de este documento mostraba `concepto` como
+ejemplo y nunca llegó a decir "y las otras 37 igual" — corregido el 9-ago-2026, al
+aplicar el esquema de verdad y notar que la prueba de aislamiento de
+`V10-ARQUITECTURA` §9 no podía pasar con una sola tabla protegida:
 
 ```sql
-alter table concepto enable row level security;
-
-create policy p_concepto_empresa on concepto
-  using (empresa_id = current_setting('app.empresa_id', true));
+do $$
+declare
+  t text;
+begin
+  for t in
+    select c.table_name from information_schema.columns c
+    join information_schema.tables tb
+      on tb.table_schema = c.table_schema and tb.table_name = c.table_name
+     where c.table_schema = 'public'
+       and c.column_name = 'empresa_id'
+       and tb.table_type = 'BASE TABLE'   -- nunca una vista: RLS no aplica a vistas
+  loop
+    execute format('alter table %I enable row level security', t);
+    execute format(
+      'create policy p_%s_empresa on %I using (empresa_id = current_setting(''app.empresa_id'', true))',
+      t, t
+    );
+  end loop;
+end $$;
 ```
+
+Un solo bloque, no 38 pares de `ALTER`/`CREATE POLICY` copiados a mano — así una tabla
+nueva que se agregue después con `empresa_id` **no puede olvidarse** de esta protección:
+basta con que la migración que la crea vuelva a correr este mismo bloque.
 
 La aplicación hace `set local app.empresa_id` al abrir cada transacción. Si un
 repositorio olvida el filtro, la base **no devuelve** las filas de la otra empresa: no es
@@ -1419,8 +1480,12 @@ De ahí en adelante:
 `insumo` → `concepto` → `tarjeta` → `cliente` → `proyecto` → `documento` → presupuesto →
 programa → obra → dinero.
 
-Hay dos referencias circulares que se resuelven con la llave foránea agregada después:
-`usuario_rol.proyecto_id` y `requisicion.compromiso_id`.
+Hay ocho referencias hacia adelante que se resuelven con la llave foránea agregada
+después de crear todas las tablas — no dos, como decía esta sección antes de la
+verificación automatizada de la rebanada 1 (comparar cada `references X(id)` contra el
+orden de creación real, en vez de llevar la lista a mano): `usuario_rol.proyecto_id`,
+`alerta.proyecto_id`, `avance.evento_id`, `avance.entrega_id`, `avance.carta_entrega_id`,
+`tramo_cobranza.compromiso_id`, `requisicion.compromiso_id`, `abono.movimiento_id`.
 
 ### 16.2 Qué significa exactamente "congelado"
 
@@ -1449,8 +1514,12 @@ columna aditiva a una tabla existente lleva `default` o admite `null`.
 `insumo` → `concepto` → `tarjeta` → `cliente` → `proyecto` → `documento` → presupuesto →
 programa → obra → dinero.
 
-Hay dos referencias circulares que se resuelven con la llave foránea agregada después:
-`usuario_rol.proyecto_id` y `requisicion.compromiso_id`.
+Hay ocho referencias hacia adelante que se resuelven con la llave foránea agregada
+después de crear todas las tablas — no dos, como decía esta sección antes de la
+verificación automatizada de la rebanada 1 (comparar cada `references X(id)` contra el
+orden de creación real, en vez de llevar la lista a mano): `usuario_rol.proyecto_id`,
+`alerta.proyecto_id`, `avance.evento_id`, `avance.entrega_id`, `avance.carta_entrega_id`,
+`tramo_cobranza.compromiso_id`, `requisicion.compromiso_id`, `abono.movimiento_id`.
 
 ---
 
@@ -1511,6 +1580,21 @@ esta sección es una migración aditiva o de nivel 2, avisada y aprobada antes d
 escribirse en el DDL de las secciones 4 a 10 — que ya la incorporan, para que ese DDL
 siga siendo la fuente de verdad del estado actual, y esta sección quede como el
 registro de cómo se llegó ahí.
+
+Esta sección tiene dos partes, y no se mezclan:
+
+- **§19.1 Migraciones de diseño** — un requisito de negocio nuevo que el esquema no
+  contemplaba. Se avisan y se aprueban antes de escribirse, como cualquier decisión de
+  producto.
+- **§19.2 Correcciones de ejecución** — el papel decía una cosa y, al construir contra
+  Postgres real, resultó ser irrealizable, incompleta o insuficiente. **Esto no es que
+  el congelamiento haya fallado — es lo contrario:** son defectos que sólo la ejecución
+  podía encontrar, no decisiones que alguien cambió de opinión. Separarlas importa para
+  que dentro de tres meses nadie lea "el esquema cambió cuatro veces la primera semana"
+  y concluya que congelarlo no sirvió — sirvió exactamente para esto: cada cambio quedó
+  registrado, con su razón, en vez de parchado en silencio.
+
+### 19.1 Migraciones de diseño
 
 ### Migración 001 · firma en `presupuesto.AUTORIZADO` · 8-ago-2026
 
@@ -1625,8 +1709,120 @@ todavía, el código no ha empezado— no se ven afectadas.
 [[V10-PANTALLAS-Y-ROLES]] pantalla 20 y en [[V10-CATALOGO-DOCUMENTOS]] — ver ambos,
 actualizados el mismo día.
 
+### 19.2 Correcciones de ejecución
+
+Las cuatro que siguen se encontraron construyendo la rebanada 1 — verificadas contra
+Postgres real, cada una con reproducción mínima antes de aceptarla como real, no
+supuesta. Formato de cada entrada: qué decía el papel · qué pasó al ejecutar · cómo se
+corrigió · por qué no se pudo prever.
+
+#### Corrección 1 · `documento.folio`: columna generada → trigger · 8-ago-2026
+
+**Qué decía el papel:** `folio` era `generated always as (...) stored`, calculado a
+partir de otras columnas de la misma fila más una subconsulta a `proyecto` para leer
+`proyecto.clave`.
+
+**Qué pasó al ejecutar:** Postgres rechazó la creación de la tabla — una columna
+generada no puede contener una subconsulta. Corregido el diseño para leer
+`proyecto.clave` con un `select ... into` en un trigger en vez de una subconsulta
+inline, Postgres **volvió a rechazarla**, esta vez con "generation expression is not
+immutable". Aislado con una repro mínima (dos tablas de prueba, un tipo enum
+descartable, con y sin `::text`): Postgres no permite un tipo `enum` dentro de una
+expresión de columna generada, **ni con cast explícito**. Dos limitaciones reales, no
+una.
+
+**Cómo se corrigió:** se abandonó `generated always as` por completo. `proyecto_clave`
+y `folio` se calculan los dos en `fn_documento_folio()`, disparada por
+`tg_documento_folio` antes de insertar o actualizar cualquiera de las columnas que
+componen el folio — el DDL completo está en la sección 7.
+
+**Por qué no se pudo prever:** ninguno de los dos límites está en la documentación de
+alto nivel de `generated always as` — sólo aparecen al intentarlo contra un Postgres
+real. Leer el manual no lo habría encontrado; ejecutarlo sí.
+
+#### Corrección 2 · referencias hacia adelante: 8, no 2 · 9-ago-2026
+
+**Qué decía el papel:** "Hay dos referencias circulares que se resuelven con la llave
+foránea agregada después: `usuario_rol.proyecto_id` y `requisicion.compromiso_id`" —
+una lista llevada a mano en §16.1.
+
+**Qué pasó al ejecutar:** el script de ensamblado de la migración compara, de forma
+automática, cada `references X(id)` contra el orden real de creación de tablas. Encontró
+ocho, no dos: `usuario_rol.proyecto_id`, `alerta.proyecto_id`, `avance.evento_id`,
+`avance.entrega_id`, `avance.carta_entrega_id`, `tramo_cobranza.compromiso_id`,
+`requisicion.compromiso_id`, `abono.movimiento_id`.
+
+**Cómo se corrigió:** el script ya las difería todas correctamente desde el principio
+— el `DDL` nunca tuvo el error, sólo la prosa de §16.1, que describía la lista corta que
+alguien llevó a mano en vez de la que el propio script calculaba. Corregida en §16.1.
+
+**Por qué no se pudo prever:** una lista de ocho referencias entre 42 tablas no es
+imposible de llevar a mano, pero sí fácil de subestimar sin una comparación
+automatizada — que es exactamente la diferencia entre documentar y verificar.
+
+#### Corrección 3 · rol de aplicación separado del rol administrador (RLS) · 9-ago-2026
+
+**Qué decía el papel:** la sección 15 especifica la política de aislamiento
+(`empresa_id = current_setting('app.empresa_id', true)`) pero no dice con qué rol se
+conecta la aplicación — un vacío, no un error de la política en sí.
+
+**Qué pasó al ejecutar:** con el rol que aplica las migraciones (dueño de las tablas,
+verificado `rolsuper = true`), RLS no se aplicaba — el dueño de una tabla se lo salta
+siempre, sin importar la política. Si la aplicación se hubiera conectado con ese
+mismo rol, el aislamiento por empresa habría dejado de existir en la base, en silencio,
+dependiendo únicamente de que ningún repositorio se equivocara nunca.
+
+**Cómo se corrigió:** un segundo rol, `app_user`, sin `SUPERUSER`, sin ser dueño de
+ninguna tabla, con permisos de datos (no de estructura) sobre el esquema. Verificado en
+vivo: con `app_user` y sin `app.empresa_id` fijado, cualquier consulta devuelve cero
+filas — nunca datos de otra empresa. El detalle operativo (cómo crear el rol, qué
+permisos exactos) vive en el README, no aquí — esto es una regla de conexión, no de
+esquema.
+
+**Por qué no se pudo prever:** la sección 15 nunca fue incorrecta — describe
+correctamente qué política existe. Lo que faltaba no era una corrección al DDL, sino
+una decisión operativa (qué rol usa la aplicación) que sólo se vuelve visible al montar
+la base y conectarse de verdad, no al leer las políticas.
+
+#### Corrección 4 · auto-consulta de `usuario_rol` bajo RLS · 9-ago-2026
+
+**Qué decía el papel:** la política genérica de la sección 15 exige `empresa_id =
+current_setting('app.empresa_id', true)` para leer cualquier fila de una tabla con
+`empresa_id`, sin excepción.
+
+**Qué pasó al ejecutar:** el primer paso después de autenticarse —saber a qué empresas
+pertenece el usuario, para poder mostrarle a cuál entrar— es, por definición, una
+consulta que todavía no tiene una empresa activa que fijar. Con la política genérica
+sola, esa consulta siempre devuelve cero filas: cualquier usuario, con cualquier
+contraseña correcta, veía "no tienes ninguna empresa asignada". No es un caso raro — es
+el primer request de cada sesión.
+
+**Cómo se corrigió:**
+
+```sql
+create policy p_usuario_rol_autoconsulta on usuario_rol
+  for select
+  using (usuario_id = current_setting('app.usuario_id', true));
+```
+
+Política nueva, sólo de `select`, nunca `for all` — ninguna escritura sobre
+`usuario_rol` queda cubierta por ella. Verificado con tres pruebas directas contra la
+base: (1) el propio usuario, sin `app.empresa_id` fijado, ve sus filas; (2) un
+`usuario_id` ajeno no ve nada; (3) un `update` sin `app.empresa_id` fijado afecta cero
+filas — la política genérica sigue gobernando toda escritura. Dos políticas permisivas
+sobre el mismo comando se combinan con `OR`; aquí sólo se amplía qué puede *leerse* para
+el caso de auto-consulta, nunca qué puede *escribirse*. Mecanismo en la aplicación:
+`app.usuario_id` se fija con el mismo patrón que `app.empresa_id`, desde un
+`conUsuario()` dedicado, usado únicamente por la carga de roles del login.
+
+**Por qué no se pudo prever:** el caso "todavía no sé en qué empresa estoy parado" no
+existe en ninguna otra pantalla de la aplicación — todas las demás parten de una
+empresa ya elegida. Sólo el flujo de login lo tiene, y sólo se descubre corriéndolo
+completo, no leyendo la política.
+
 ---
 
-*Documento 4 de 8 · APROBADO Y CONGELADO el 8-ago-2026, con las migraciones 001, 002 y
-003 posteriores. El anteproyecto y el proyecto ejecutivo —los ocho documentos— cerraron
-el 9-ago-2026 con [[V10-API]].*
+*Documento 4 de 8 · APROBADO Y CONGELADO el 8-ago-2026, con las migraciones de diseño
+001, 002 y 003, y las cuatro correcciones de ejecución de §19.2, posteriores. El
+anteproyecto y el proyecto ejecutivo —los ocho documentos— cerraron el 9-ago-2026 con
+[[V10-API]].*

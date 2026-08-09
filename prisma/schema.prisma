@@ -1,0 +1,1489 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model abono {
+  id                                     String     @id @db.Char(26)
+  empresa_id                             String     @db.Char(26)
+  activo                                 Boolean    @default(true)
+  desactivado_en                         DateTime?  @db.Timestamptz(6)
+  desactivado_por                        String?    @db.Char(26)
+  motivo_desactivacion                   String?
+  creado_en                              DateTime   @default(now()) @db.Timestamptz(6)
+  creado_por                             String     @db.Char(26)
+  actualizado_en                         DateTime   @default(now()) @db.Timestamptz(6)
+  actualizado_por                        String     @db.Char(26)
+  compromiso_id                          String     @db.Char(26)
+  movimiento_id                          String     @db.Char(26)
+  fecha                                  DateTime   @db.Date
+  monto                                  Decimal    @db.Decimal(16, 4)
+  forma_pago                             forma_pago
+  referencia                             String?    @db.VarChar(80)
+  notas                                  String?
+  usuario_abono_actualizado_porTousuario usuario    @relation("abono_actualizado_porTousuario", fields: [actualizado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  compromiso                             compromiso @relation(fields: [compromiso_id], references: [id], onUpdate: NoAction)
+  usuario_abono_creado_porTousuario      usuario    @relation("abono_creado_porTousuario", fields: [creado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario_abono_desactivado_porTousuario usuario?   @relation("abono_desactivado_porTousuario", fields: [desactivado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  empresa                                empresa    @relation(fields: [empresa_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  movimiento                             movimiento @relation(fields: [movimiento_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_abono_movimiento_id")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model actividad {
+  id                                         String                 @id @db.Char(26)
+  empresa_id                                 String                 @db.Char(26)
+  activo                                     Boolean                @default(true)
+  desactivado_en                             DateTime?              @db.Timestamptz(6)
+  desactivado_por                            String?                @db.Char(26)
+  motivo_desactivacion                       String?
+  creado_en                                  DateTime               @default(now()) @db.Timestamptz(6)
+  creado_por                                 String                 @db.Char(26)
+  actualizado_en                             DateTime               @default(now()) @db.Timestamptz(6)
+  actualizado_por                            String                 @db.Char(26)
+  proyecto_id                                String                 @db.Char(26)
+  presupuesto_concepto_id                    String                 @db.Char(26)
+  nombre                                     String                 @db.VarChar(200)
+  fecha_inicio                               DateTime               @db.Date
+  fecha_fin                                  DateTime               @db.Date
+  es_hito                                    Boolean                @default(false)
+  predecesor_id                              String?                @db.Char(26)
+  dias_holgura                               Int                    @default(0)
+  estado                                     estado_concepto_obra   @default(NO_INICIADO)
+  usuario_actividad_actualizado_porTousuario usuario                @relation("actividad_actualizado_porTousuario", fields: [actualizado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario_actividad_creado_porTousuario      usuario                @relation("actividad_creado_porTousuario", fields: [creado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario_actividad_desactivado_porTousuario usuario?               @relation("actividad_desactivado_porTousuario", fields: [desactivado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  empresa                                    empresa                @relation(fields: [empresa_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  actividad                                  actividad?             @relation("actividadToactividad", fields: [predecesor_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  other_actividad                            actividad[]            @relation("actividadToactividad")
+  presupuesto_concepto                       presupuesto_concepto   @relation(fields: [presupuesto_concepto_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  proyecto                                   proyecto               @relation(fields: [proyecto_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  avance                                     avance[]
+  linea_base_actividad                       linea_base_actividad[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model alerta {
+  id                                      String    @id @db.Char(26)
+  empresa_id                              String    @db.Char(26)
+  activo                                  Boolean   @default(true)
+  desactivado_en                          DateTime? @db.Timestamptz(6)
+  desactivado_por                         String?   @db.Char(26)
+  motivo_desactivacion                    String?
+  creado_en                               DateTime  @default(now()) @db.Timestamptz(6)
+  creado_por                              String    @db.Char(26)
+  actualizado_en                          DateTime  @default(now()) @db.Timestamptz(6)
+  actualizado_por                         String    @db.Char(26)
+  tipo                                    String    @db.VarChar(40)
+  severidad                               String    @db.VarChar(12)
+  rol_id                                  String    @db.Char(26)
+  proyecto_id                             String?   @db.Char(26)
+  entidad_tipo                            String    @db.VarChar(40)
+  entidad_id                              String    @db.Char(26)
+  mensaje                                 String
+  leida_en                                DateTime? @db.Timestamptz(6)
+  resuelta_en                             DateTime? @db.Timestamptz(6)
+  resuelta_por                            String?   @db.Char(26)
+  usuario_alerta_actualizado_porTousuario usuario   @relation("alerta_actualizado_porTousuario", fields: [actualizado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario_alerta_creado_porTousuario      usuario   @relation("alerta_creado_porTousuario", fields: [creado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario_alerta_desactivado_porTousuario usuario?  @relation("alerta_desactivado_porTousuario", fields: [desactivado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  empresa                                 empresa   @relation(fields: [empresa_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario_alerta_resuelta_porTousuario    usuario?  @relation("alerta_resuelta_porTousuario", fields: [resuelta_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  rol                                     rol       @relation(fields: [rol_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  proyecto                                proyecto? @relation(fields: [proyecto_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_alerta_proyecto_id")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model avance {
+  id                                      String         @id @db.Char(26)
+  empresa_id                              String         @db.Char(26)
+  activo                                  Boolean        @default(true)
+  desactivado_en                          DateTime?      @db.Timestamptz(6)
+  desactivado_por                         String?        @db.Char(26)
+  motivo_desactivacion                    String?
+  creado_en                               DateTime       @default(now()) @db.Timestamptz(6)
+  creado_por                              String         @db.Char(26)
+  actualizado_en                          DateTime       @default(now()) @db.Timestamptz(6)
+  actualizado_por                         String         @db.Char(26)
+  actividad_id                            String         @db.Char(26)
+  fecha                                   DateTime       @db.Date
+  porcentaje                              Decimal        @db.Decimal(7, 4)
+  evento_id                               String?        @db.Char(26)
+  entrega_id                              String?        @db.Char(26)
+  carta_entrega_id                        String?        @db.Char(26)
+  notas                                   String?
+  actividad                               actividad      @relation(fields: [actividad_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario_avance_actualizado_porTousuario usuario        @relation("avance_actualizado_porTousuario", fields: [actualizado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario_avance_creado_porTousuario      usuario        @relation("avance_creado_porTousuario", fields: [creado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario_avance_desactivado_porTousuario usuario?       @relation("avance_desactivado_porTousuario", fields: [desactivado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  empresa                                 empresa        @relation(fields: [empresa_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  carta_entrega                           carta_entrega? @relation(fields: [carta_entrega_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_avance_carta_entrega_id")
+  entrega                                 entrega?       @relation(fields: [entrega_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_avance_entrega_id")
+  evento                                  evento?        @relation(fields: [evento_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_avance_evento_id")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model carta_entrega {
+  id                                             String       @id @db.Char(26)
+  empresa_id                                     String       @db.Char(26)
+  activo                                         Boolean      @default(true)
+  desactivado_en                                 DateTime?    @db.Timestamptz(6)
+  desactivado_por                                String?      @db.Char(26)
+  motivo_desactivacion                           String?
+  creado_en                                      DateTime     @default(now()) @db.Timestamptz(6)
+  creado_por                                     String       @db.Char(26)
+  actualizado_en                                 DateTime     @default(now()) @db.Timestamptz(6)
+  actualizado_por                                String       @db.Char(26)
+  nivel                                          String       @db.VarChar(12)
+  requisicion_id                                 String?      @db.Char(26)
+  proyecto_id                                    String?      @db.Char(26)
+  entrega_id                                     String?      @db.Char(26)
+  documento_id                                   String       @db.Char(26)
+  fecha_firma                                    DateTime     @db.Date
+  firmada_por                                    String       @db.VarChar(160)
+  archivo                                        String
+  avance                                         avance[]
+  usuario_carta_entrega_actualizado_porTousuario usuario      @relation("carta_entrega_actualizado_porTousuario", fields: [actualizado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario_carta_entrega_creado_porTousuario      usuario      @relation("carta_entrega_creado_porTousuario", fields: [creado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario_carta_entrega_desactivado_porTousuario usuario?     @relation("carta_entrega_desactivado_porTousuario", fields: [desactivado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  documento                                      documento    @relation(fields: [documento_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  empresa                                        empresa      @relation(fields: [empresa_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  entrega                                        entrega?     @relation(fields: [entrega_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  proyecto                                       proyecto?    @relation(fields: [proyecto_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  requisicion                                    requisicion? @relation(fields: [requisicion_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model categoria_gasto {
+  id                                               String                @id @db.Char(26)
+  empresa_id                                       String                @db.Char(26)
+  activo                                           Boolean               @default(true)
+  desactivado_en                                   DateTime?             @db.Timestamptz(6)
+  desactivado_por                                  String?               @db.Char(26)
+  motivo_desactivacion                             String?
+  creado_en                                        DateTime              @default(now()) @db.Timestamptz(6)
+  creado_por                                       String                @db.Char(26)
+  actualizado_en                                   DateTime              @default(now()) @db.Timestamptz(6)
+  actualizado_por                                  String                @db.Char(26)
+  nivel1                                           categoria_gasto_n1
+  padre_id                                         String?               @db.Char(26)
+  clave                                            String                @db.VarChar(40)
+  nombre                                           String                @db.VarChar(80)
+  usuario_categoria_gasto_actualizado_porTousuario usuario               @relation("categoria_gasto_actualizado_porTousuario", fields: [actualizado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario_categoria_gasto_creado_porTousuario      usuario               @relation("categoria_gasto_creado_porTousuario", fields: [creado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario_categoria_gasto_desactivado_porTousuario usuario?              @relation("categoria_gasto_desactivado_porTousuario", fields: [desactivado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  empresa                                          empresa               @relation(fields: [empresa_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  categoria_gasto                                  categoria_gasto?      @relation("categoria_gastoTocategoria_gasto", fields: [padre_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  other_categoria_gasto                            categoria_gasto[]     @relation("categoria_gastoTocategoria_gasto")
+  movimiento_concepto                              movimiento_concepto[]
+
+  @@unique([empresa_id, clave], map: "uq_categoria_gasto")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model cliente {
+  id                                       String       @id @db.Char(26)
+  empresa_id                               String       @db.Char(26)
+  activo                                   Boolean      @default(true)
+  desactivado_en                           DateTime?    @db.Timestamptz(6)
+  desactivado_por                          String?      @db.Char(26)
+  motivo_desactivacion                     String?
+  creado_en                                DateTime     @default(now()) @db.Timestamptz(6)
+  creado_por                               String       @db.Char(26)
+  actualizado_en                           DateTime     @default(now()) @db.Timestamptz(6)
+  actualizado_por                          String       @db.Char(26)
+  clave                                    String       @db.VarChar(12)
+  nombre                                   String       @db.VarChar(160)
+  rfc                                      String?      @db.VarChar(13)
+  telefono                                 String?      @db.VarChar(30)
+  correo                                   String?      @db.VarChar(160)
+  direccion                                String?
+  usuario_cliente_actualizado_porTousuario usuario      @relation("cliente_actualizado_porTousuario", fields: [actualizado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario_cliente_creado_porTousuario      usuario      @relation("cliente_creado_porTousuario", fields: [creado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario_cliente_desactivado_porTousuario usuario?     @relation("cliente_desactivado_porTousuario", fields: [desactivado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  empresa                                  empresa      @relation(fields: [empresa_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  compromiso                               compromiso[]
+  movimiento                               movimiento[]
+  proyecto                                 proyecto[]
+
+  @@unique([empresa_id, clave], map: "uq_cliente_clave")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model compromiso {
+  id                                          String            @id @db.Char(26)
+  empresa_id                                  String            @db.Char(26)
+  activo                                      Boolean           @default(true)
+  desactivado_en                              DateTime?         @db.Timestamptz(6)
+  desactivado_por                             String?           @db.Char(26)
+  motivo_desactivacion                        String?
+  creado_en                                   DateTime          @default(now()) @db.Timestamptz(6)
+  creado_por                                  String            @db.Char(26)
+  actualizado_en                              DateTime          @default(now()) @db.Timestamptz(6)
+  actualizado_por                             String            @db.Char(26)
+  proyecto_id                                 String            @db.Char(26)
+  direccion                                   direccion_dinero
+  origen_tipo                                 origen_compromiso
+  origen_id                                   String            @db.Char(26)
+  contraparte_cliente_id                      String?           @db.Char(26)
+  contraparte_proveedor_id                    String?           @db.Char(26)
+  monto                                       Decimal           @db.Decimal(16, 4)
+  fecha_compromiso                            DateTime          @db.Date
+  notas                                       String?
+  abono                                       abono[]
+  usuario_compromiso_actualizado_porTousuario usuario           @relation("compromiso_actualizado_porTousuario", fields: [actualizado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  cliente                                     cliente?          @relation(fields: [contraparte_cliente_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  proveedor                                   proveedor?        @relation(fields: [contraparte_proveedor_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario_compromiso_creado_porTousuario      usuario           @relation("compromiso_creado_porTousuario", fields: [creado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario_compromiso_desactivado_porTousuario usuario?          @relation("compromiso_desactivado_porTousuario", fields: [desactivado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  empresa                                     empresa           @relation(fields: [empresa_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  proyecto                                    proyecto          @relation(fields: [proyecto_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  requisicion                                 requisicion[]
+  tramo_cobranza                              tramo_cobranza[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+/// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
+model concepto {
+  id                                        String                 @id @db.Char(26)
+  empresa_id                                String                 @db.Char(26)
+  activo                                    Boolean                @default(true)
+  desactivado_en                            DateTime?              @db.Timestamptz(6)
+  desactivado_por                           String?                @db.Char(26)
+  motivo_desactivacion                      String?
+  creado_en                                 DateTime               @default(now()) @db.Timestamptz(6)
+  creado_por                                String                 @db.Char(26)
+  actualizado_en                            DateTime               @default(now()) @db.Timestamptz(6)
+  actualizado_por                           String                 @db.Char(26)
+  clave                                     String                 @db.VarChar(11)
+  clave_anterior                            String?                @db.VarChar(16)
+  partida_id                                String                 @db.Char(26)
+  padre_id                                  String?                @db.Char(26)
+  descripcion                               String
+  unidad_id                                 String                 @db.Char(26)
+  duracion_dias                             Decimal?               @db.Decimal(7, 2)
+  tipo_precio                               tipo_precio            @default(FIJO)
+  valor                                     Decimal?               @db.Decimal(14, 4)
+  labor_pct                                 Decimal                @default(40) @db.Decimal(7, 4)
+  hta_menor_pct                             Decimal                @default(0) @db.Decimal(7, 4)
+  indirectos_pct                            Decimal                @default(0) @db.Decimal(7, 4)
+  financiamiento_pct                        Decimal                @default(0) @db.Decimal(7, 4)
+  utilidad_pct                              Decimal                @default(0) @db.Decimal(7, 4)
+  notas                                     String?
+  usuario_concepto_actualizado_porTousuario usuario                @relation("concepto_actualizado_porTousuario", fields: [actualizado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario_concepto_creado_porTousuario      usuario                @relation("concepto_creado_porTousuario", fields: [creado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario_concepto_desactivado_porTousuario usuario?               @relation("concepto_desactivado_porTousuario", fields: [desactivado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  empresa                                   empresa                @relation(fields: [empresa_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  concepto                                  concepto?              @relation("conceptoToconcepto", fields: [padre_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  other_concepto                            concepto[]             @relation("conceptoToconcepto")
+  partida                                   partida                @relation(fields: [partida_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  unidad                                    unidad                 @relation(fields: [unidad_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  evento                                    evento[]
+  movimiento_concepto                       movimiento_concepto[]
+  presupuesto_concepto                      presupuesto_concepto[]
+  requisicion_concepto                      requisicion_concepto[]
+  tarjeta                                   tarjeta?
+
+  @@unique([empresa_id, clave], map: "uq_concepto_clave")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model cotizacion {
+  id                                          String        @id @db.Char(26)
+  empresa_id                                  String        @db.Char(26)
+  activo                                      Boolean       @default(true)
+  desactivado_en                              DateTime?     @db.Timestamptz(6)
+  desactivado_por                             String?       @db.Char(26)
+  motivo_desactivacion                        String?
+  creado_en                                   DateTime      @default(now()) @db.Timestamptz(6)
+  creado_por                                  String        @db.Char(26)
+  actualizado_en                              DateTime      @default(now()) @db.Timestamptz(6)
+  actualizado_por                             String        @db.Char(26)
+  proyecto_id                                 String        @db.Char(26)
+  proveedor_id                                String        @db.Char(26)
+  clave                                       String        @db.VarChar(16)
+  fecha                                       DateTime      @db.Date
+  vigencia_hasta                              DateTime?     @db.Date
+  importe                                     Decimal       @db.Decimal(16, 4)
+  archivo                                     String?
+  es_implicita                                Boolean       @default(false)
+  notas                                       String?
+  usuario_cotizacion_actualizado_porTousuario usuario       @relation("cotizacion_actualizado_porTousuario", fields: [actualizado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario_cotizacion_creado_porTousuario      usuario       @relation("cotizacion_creado_porTousuario", fields: [creado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario_cotizacion_desactivado_porTousuario usuario?      @relation("cotizacion_desactivado_porTousuario", fields: [desactivado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  empresa                                     empresa       @relation(fields: [empresa_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  proveedor                                   proveedor     @relation(fields: [proveedor_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  proyecto                                    proyecto      @relation(fields: [proyecto_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  requisicion                                 requisicion[]
+
+  @@unique([empresa_id, clave], map: "uq_cotizacion_clave")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model documento {
+  id                                         String           @id @db.Char(26)
+  empresa_id                                 String           @db.Char(26)
+  activo                                     Boolean          @default(true)
+  desactivado_en                             DateTime?        @db.Timestamptz(6)
+  desactivado_por                            String?          @db.Char(26)
+  motivo_desactivacion                       String?
+  creado_en                                  DateTime         @default(now()) @db.Timestamptz(6)
+  creado_por                                 String           @db.Char(26)
+  actualizado_en                             DateTime         @default(now()) @db.Timestamptz(6)
+  actualizado_por                            String           @db.Char(26)
+  proyecto_id                                String?          @db.Char(26)
+  creador                                    String           @db.VarChar(4)
+  progreso                                   etapa_bim
+  funcion                                    String           @db.Char(1)
+  bloque                                     String           @db.Char(1)
+  bloque_num                                 String           @default("01") @db.Char(2)
+  nivel                                      String           @default("ZZ") @db.VarChar(3)
+  tipo                                       String           @db.Char(2)
+  numero                                     Int
+  revision                                   Int              @default(0)
+  estado                                     estado_documento @default(S0)
+  entidad_tipo                               String?          @db.VarChar(40)
+  entidad_id                                 String?          @db.Char(26)
+  archivo                                    String?
+  iva_pct                                    Decimal          @db.Decimal(7, 4)
+  proyecto_clave                             String?          @db.VarChar(4)
+  folio                                      String?
+  carta_entrega                              carta_entrega[]
+  usuario_documento_actualizado_porTousuario usuario          @relation("documento_actualizado_porTousuario", fields: [actualizado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario_documento_creado_porTousuario      usuario          @relation("documento_creado_porTousuario", fields: [creado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario_documento_desactivado_porTousuario usuario?         @relation("documento_desactivado_porTousuario", fields: [desactivado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  empresa                                    empresa          @relation(fields: [empresa_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  proyecto                                   proyecto?        @relation(fields: [proyecto_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  movimiento                                 movimiento[]
+  presupuesto                                presupuesto[]
+
+  @@unique([empresa_id, proyecto_id, tipo, numero, revision], map: "uq_documento_folio")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model empresa {
+  id                         String                    @id @db.Char(26)
+  grupo_empresa_id           String                    @db.Char(26)
+  clave                      String                    @unique(map: "uq_empresa_clave") @db.VarChar(8)
+  nombre_comercial           String                    @db.VarChar(120)
+  nombre_fiscal              String?                   @db.VarChar(200)
+  rfc                        String?                   @db.VarChar(13)
+  iva_pct                    Decimal                   @default(16) @db.Decimal(7, 4)
+  vigencia_dias_cotizacion   Int                       @default(15)
+  moneda                     String                    @default("MXN") @db.Char(3)
+  logo                       String?
+  leyenda_confidencialidad   String?
+  leyenda_legal              String?
+  pie_documento              String?
+  activo                     Boolean                   @default(true)
+  monto_maximo_autorrevision Decimal                   @default(5000) @db.Decimal(16, 4)
+  abono                      abono[]
+  actividad                  actividad[]
+  alerta                     alerta[]
+  avance                     avance[]
+  carta_entrega              carta_entrega[]
+  categoria_gasto            categoria_gasto[]
+  cliente                    cliente[]
+  compromiso                 compromiso[]
+  concepto                   concepto[]
+  cotizacion                 cotizacion[]
+  documento                  documento[]
+  grupo_empresa              grupo_empresa             @relation(fields: [grupo_empresa_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  entrega                    entrega[]
+  evento                     evento[]
+  evento_adjunto             evento_adjunto[]
+  evento_estado              evento_estado[]
+  evento_foto                evento_foto[]
+  generador                  generador[]
+  insumo                     insumo[]
+  linea_base                 linea_base[]
+  movimiento                 movimiento[]
+  movimiento_concepto        movimiento_concepto[]
+  partida                    partida[]
+  presupuesto                presupuesto[]
+  presupuesto_concepto       presupuesto_concepto[]
+  presupuesto_modulo         presupuesto_modulo[]
+  presupuesto_opcion         presupuesto_opcion[]
+  proveedor                  proveedor[]
+  proyecto                   proyecto[]
+  renglon_tarjeta            renglon_tarjeta[]
+  requisicion                requisicion[]
+  requisicion_concepto       requisicion_concepto[]
+  requisicion_renglon        requisicion_renglon[]
+  semana_flujo               semana_flujo[]
+  sincronizacion_recibida    sincronizacion_recibida[]
+  tarjeta                    tarjeta[]
+  tramo_cobranza             tramo_cobranza[]
+  unidad                     unidad[]
+  usuario_rol                usuario_rol[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model entrega {
+  id                                       String          @id @db.Char(26)
+  empresa_id                               String          @db.Char(26)
+  activo                                   Boolean         @default(true)
+  desactivado_en                           DateTime?       @db.Timestamptz(6)
+  desactivado_por                          String?         @db.Char(26)
+  motivo_desactivacion                     String?
+  creado_en                                DateTime        @default(now()) @db.Timestamptz(6)
+  creado_por                               String          @db.Char(26)
+  actualizado_en                           DateTime        @default(now()) @db.Timestamptz(6)
+  actualizado_por                          String          @db.Char(26)
+  requisicion_id                           String          @db.Char(26)
+  fecha                                    DateTime        @db.Date
+  es_parcial                               Boolean         @default(false)
+  recibida_por                             String          @db.Char(26)
+  evento_id                                String?         @db.Char(26)
+  notas                                    String?
+  avance                                   avance[]
+  carta_entrega                            carta_entrega[]
+  usuario_entrega_actualizado_porTousuario usuario         @relation("entrega_actualizado_porTousuario", fields: [actualizado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario_entrega_creado_porTousuario      usuario         @relation("entrega_creado_porTousuario", fields: [creado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario_entrega_desactivado_porTousuario usuario?        @relation("entrega_desactivado_porTousuario", fields: [desactivado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  empresa                                  empresa         @relation(fields: [empresa_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  evento                                   evento?         @relation(fields: [evento_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario_entrega_recibida_porTousuario    usuario         @relation("entrega_recibida_porTousuario", fields: [recibida_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  requisicion                              requisicion     @relation(fields: [requisicion_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model evento {
+  id                                      String           @id @db.Char(26)
+  empresa_id                              String           @db.Char(26)
+  activo                                  Boolean          @default(true)
+  desactivado_en                          DateTime?        @db.Timestamptz(6)
+  desactivado_por                         String?          @db.Char(26)
+  motivo_desactivacion                    String?
+  creado_en                               DateTime         @default(now()) @db.Timestamptz(6)
+  creado_por                              String           @db.Char(26)
+  actualizado_en                          DateTime         @default(now()) @db.Timestamptz(6)
+  actualizado_por                         String           @db.Char(26)
+  proyecto_id                             String           @db.Char(26)
+  tipo                                    String           @db.VarChar(40)
+  criticidad                              String           @default("ORDINARIA") @db.VarChar(12)
+  ocurrido_en                             DateTime         @db.Timestamptz(6)
+  descripcion                             String
+  ubicacion                               String?          @db.VarChar(120)
+  clima                                   String?          @db.VarChar(40)
+  concepto_id                             String?          @db.Char(26)
+  notas_tecnicas                          String?
+  avance                                  avance[]
+  entrega                                 entrega[]
+  usuario_evento_actualizado_porTousuario usuario          @relation("evento_actualizado_porTousuario", fields: [actualizado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  concepto                                concepto?        @relation(fields: [concepto_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario_evento_creado_porTousuario      usuario          @relation("evento_creado_porTousuario", fields: [creado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario_evento_desactivado_porTousuario usuario?         @relation("evento_desactivado_porTousuario", fields: [desactivado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  empresa                                 empresa          @relation(fields: [empresa_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  proyecto                                proyecto         @relation(fields: [proyecto_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  evento_adjunto                          evento_adjunto[]
+  evento_foto                             evento_foto[]
+  movimiento                              movimiento[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model evento_adjunto {
+  id                                              String    @id @db.Char(26)
+  empresa_id                                      String    @db.Char(26)
+  activo                                          Boolean   @default(true)
+  desactivado_en                                  DateTime? @db.Timestamptz(6)
+  desactivado_por                                 String?   @db.Char(26)
+  motivo_desactivacion                            String?
+  creado_en                                       DateTime  @default(now()) @db.Timestamptz(6)
+  creado_por                                      String    @db.Char(26)
+  actualizado_en                                  DateTime  @default(now()) @db.Timestamptz(6)
+  actualizado_por                                 String    @db.Char(26)
+  evento_id                                       String    @db.Char(26)
+  archivo                                         String
+  tipo                                            String    @db.VarChar(40)
+  descripcion                                     String?
+  usuario_evento_adjunto_actualizado_porTousuario usuario   @relation("evento_adjunto_actualizado_porTousuario", fields: [actualizado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario_evento_adjunto_creado_porTousuario      usuario   @relation("evento_adjunto_creado_porTousuario", fields: [creado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario_evento_adjunto_desactivado_porTousuario usuario?  @relation("evento_adjunto_desactivado_porTousuario", fields: [desactivado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  empresa                                         empresa   @relation(fields: [empresa_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  evento                                          evento    @relation(fields: [evento_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model evento_estado {
+  id              String   @id @db.Char(26)
+  empresa_id      String   @db.Char(26)
+  entidad_tipo    String   @db.VarChar(40)
+  entidad_id      String   @db.Char(26)
+  estado_anterior String?  @db.VarChar(40)
+  estado_nuevo    String   @db.VarChar(40)
+  motivo          String?
+  usuario_id      String   @db.Char(26)
+  ocurrido_en     DateTime @default(now()) @db.Timestamptz(6)
+  empresa         empresa  @relation(fields: [empresa_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario         usuario  @relation(fields: [usuario_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([entidad_tipo, entidad_id, ocurrido_en(sort: Desc)], map: "ix_evento_estado_entidad")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model evento_foto {
+  id                                           String    @id @db.Char(26)
+  empresa_id                                   String    @db.Char(26)
+  activo                                       Boolean   @default(true)
+  desactivado_en                               DateTime? @db.Timestamptz(6)
+  desactivado_por                              String?   @db.Char(26)
+  motivo_desactivacion                         String?
+  creado_en                                    DateTime  @default(now()) @db.Timestamptz(6)
+  creado_por                                   String    @db.Char(26)
+  actualizado_en                               DateTime  @default(now()) @db.Timestamptz(6)
+  actualizado_por                              String    @db.Char(26)
+  evento_id                                    String    @db.Char(26)
+  archivo                                      String
+  descripcion                                  String?
+  tomada_en                                    DateTime? @db.Timestamptz(6)
+  orden                                        Int       @default(0)
+  usuario_evento_foto_actualizado_porTousuario usuario   @relation("evento_foto_actualizado_porTousuario", fields: [actualizado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario_evento_foto_creado_porTousuario      usuario   @relation("evento_foto_creado_porTousuario", fields: [creado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario_evento_foto_desactivado_porTousuario usuario?  @relation("evento_foto_desactivado_porTousuario", fields: [desactivado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  empresa                                      empresa   @relation(fields: [empresa_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  evento                                       evento    @relation(fields: [evento_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model generador {
+  id                                         String               @id @db.Char(26)
+  empresa_id                                 String               @db.Char(26)
+  activo                                     Boolean              @default(true)
+  desactivado_en                             DateTime?            @db.Timestamptz(6)
+  desactivado_por                            String?              @db.Char(26)
+  motivo_desactivacion                       String?
+  creado_en                                  DateTime             @default(now()) @db.Timestamptz(6)
+  creado_por                                 String               @db.Char(26)
+  actualizado_en                             DateTime             @default(now()) @db.Timestamptz(6)
+  actualizado_por                            String               @db.Char(26)
+  presupuesto_concepto_id                    String               @db.Char(26)
+  descripcion                                String
+  eje                                        String?              @db.VarChar(40)
+  cantidad                                   Decimal              @default(1) @db.Decimal(14, 4)
+  largo                                      Decimal?             @db.Decimal(14, 4)
+  ancho                                      Decimal?             @db.Decimal(14, 4)
+  alto                                       Decimal?             @db.Decimal(14, 4)
+  factor                                     Decimal              @default(1) @db.Decimal(14, 4)
+  orden                                      Int                  @default(0)
+  usuario_generador_actualizado_porTousuario usuario              @relation("generador_actualizado_porTousuario", fields: [actualizado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario_generador_creado_porTousuario      usuario              @relation("generador_creado_porTousuario", fields: [creado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario_generador_desactivado_porTousuario usuario?             @relation("generador_desactivado_porTousuario", fields: [desactivado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  empresa                                    empresa              @relation(fields: [empresa_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  presupuesto_concepto                       presupuesto_concepto @relation(fields: [presupuesto_concepto_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model grupo_empresa {
+  id      String    @id @db.Char(26)
+  nombre  String    @db.VarChar(120)
+  activo  Boolean   @default(true)
+  empresa empresa[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model insumo {
+  id                                      String                @id @db.Char(26)
+  empresa_id                              String                @db.Char(26)
+  activo                                  Boolean               @default(true)
+  desactivado_en                          DateTime?             @db.Timestamptz(6)
+  desactivado_por                         String?               @db.Char(26)
+  motivo_desactivacion                    String?
+  creado_en                               DateTime              @default(now()) @db.Timestamptz(6)
+  creado_por                              String                @db.Char(26)
+  actualizado_en                          DateTime              @default(now()) @db.Timestamptz(6)
+  actualizado_por                         String                @db.Char(26)
+  clave                                   String                @db.VarChar(12)
+  tipo                                    tipo_insumo
+  descripcion                             String
+  unidad_id                               String                @db.Char(26)
+  proveedor_id                            String?               @db.Char(26)
+  costo_unitario                          Decimal?              @db.Decimal(14, 4)
+  salario_base                            Decimal?              @db.Decimal(14, 4)
+  factor_fasar                            Decimal?              @db.Decimal(7, 4)
+  rendimiento_estandar                    Decimal?              @db.Decimal(14, 4)
+  consumo_combustible                     Decimal?              @db.Decimal(14, 4)
+  costo_combustible_dia                   Decimal?              @db.Decimal(14, 4)
+  requiere_operador                       Boolean?
+  factor_aplicacion                       factor_aplicacion?
+  usuario_insumo_actualizado_porTousuario usuario               @relation("insumo_actualizado_porTousuario", fields: [actualizado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario_insumo_creado_porTousuario      usuario               @relation("insumo_creado_porTousuario", fields: [creado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario_insumo_desactivado_porTousuario usuario?              @relation("insumo_desactivado_porTousuario", fields: [desactivado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  empresa                                 empresa               @relation(fields: [empresa_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  proveedor                               proveedor?            @relation(fields: [proveedor_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  unidad                                  unidad                @relation(fields: [unidad_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  renglon_tarjeta                         renglon_tarjeta[]
+  requisicion_renglon                     requisicion_renglon[]
+
+  @@unique([empresa_id, clave], map: "uq_insumo_clave")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model linea_base {
+  id                                          String                 @id @db.Char(26)
+  empresa_id                                  String                 @db.Char(26)
+  activo                                      Boolean                @default(true)
+  desactivado_en                              DateTime?              @db.Timestamptz(6)
+  desactivado_por                             String?                @db.Char(26)
+  motivo_desactivacion                        String?
+  creado_en                                   DateTime               @default(now()) @db.Timestamptz(6)
+  creado_por                                  String                 @db.Char(26)
+  actualizado_en                              DateTime               @default(now()) @db.Timestamptz(6)
+  actualizado_por                             String                 @db.Char(26)
+  proyecto_id                                 String                 @db.Char(26)
+  version                                     Int
+  congelada_en                                DateTime               @default(now()) @db.Timestamptz(6)
+  motivo                                      String
+  usuario_linea_base_actualizado_porTousuario usuario                @relation("linea_base_actualizado_porTousuario", fields: [actualizado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario_linea_base_creado_porTousuario      usuario                @relation("linea_base_creado_porTousuario", fields: [creado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario_linea_base_desactivado_porTousuario usuario?               @relation("linea_base_desactivado_porTousuario", fields: [desactivado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  empresa                                     empresa                @relation(fields: [empresa_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  proyecto                                    proyecto               @relation(fields: [proyecto_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  linea_base_actividad                        linea_base_actividad[]
+
+  @@unique([proyecto_id, version], map: "uq_linea_base")
+}
+
+model linea_base_actividad {
+  id            String     @id @db.Char(26)
+  linea_base_id String     @db.Char(26)
+  actividad_id  String     @db.Char(26)
+  fecha_inicio  DateTime   @db.Date
+  fecha_fin     DateTime   @db.Date
+  actividad     actividad  @relation(fields: [actividad_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  linea_base    linea_base @relation(fields: [linea_base_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model movimiento {
+  id                                          String                @id @db.Char(26)
+  empresa_id                                  String                @db.Char(26)
+  activo                                      Boolean               @default(true)
+  desactivado_en                              DateTime?             @db.Timestamptz(6)
+  desactivado_por                             String?               @db.Char(26)
+  motivo_desactivacion                        String?
+  creado_en                                   DateTime              @default(now()) @db.Timestamptz(6)
+  creado_por                                  String                @db.Char(26)
+  actualizado_en                              DateTime              @default(now()) @db.Timestamptz(6)
+  actualizado_por                             String                @db.Char(26)
+  proyecto_id                                 String                @db.Char(26)
+  clave                                       String                @db.VarChar(16)
+  tipo                                        direccion_dinero
+  fecha                                       DateTime              @db.Date
+  importe                                     Decimal               @db.Decimal(16, 4)
+  forma_pago                                  forma_pago
+  cliente_id                                  String?               @db.Char(26)
+  proveedor_id                                String?               @db.Char(26)
+  documento_id                                String?               @db.Char(26)
+  comprobante                                 String?
+  evento_id                                   String?               @db.Char(26)
+  notas                                       String?
+  abono                                       abono[]
+  usuario_movimiento_actualizado_porTousuario usuario               @relation("movimiento_actualizado_porTousuario", fields: [actualizado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  cliente                                     cliente?              @relation(fields: [cliente_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario_movimiento_creado_porTousuario      usuario               @relation("movimiento_creado_porTousuario", fields: [creado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario_movimiento_desactivado_porTousuario usuario?              @relation("movimiento_desactivado_porTousuario", fields: [desactivado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  documento                                   documento?            @relation(fields: [documento_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  empresa                                     empresa               @relation(fields: [empresa_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  evento                                      evento?               @relation(fields: [evento_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  proveedor                                   proveedor?            @relation(fields: [proveedor_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  proyecto                                    proyecto              @relation(fields: [proyecto_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  movimiento_concepto                         movimiento_concepto[]
+
+  @@unique([empresa_id, clave], map: "uq_movimiento_clave")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model movimiento_concepto {
+  id                      String                @id @db.Char(26)
+  empresa_id              String                @db.Char(26)
+  movimiento_id           String                @db.Char(26)
+  concepto_id             String                @db.Char(26)
+  presupuesto_concepto_id String?               @db.Char(26)
+  categoria_gasto_id      String                @db.Char(26)
+  importe                 Decimal               @db.Decimal(16, 4)
+  categoria_gasto         categoria_gasto       @relation(fields: [categoria_gasto_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  concepto                concepto              @relation(fields: [concepto_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  empresa                 empresa               @relation(fields: [empresa_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  movimiento              movimiento            @relation(fields: [movimiento_id], references: [id], onUpdate: NoAction)
+  presupuesto_concepto    presupuesto_concepto? @relation(fields: [presupuesto_concepto_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([movimiento_id, concepto_id], map: "uq_movimiento_concepto")
+  @@index([concepto_id], map: "ix_movconcepto_concepto")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model partida {
+  id                                       String                 @id @db.Char(26)
+  empresa_id                               String                 @db.Char(26)
+  activo                                   Boolean                @default(true)
+  desactivado_en                           DateTime?              @db.Timestamptz(6)
+  desactivado_por                          String?                @db.Char(26)
+  motivo_desactivacion                     String?
+  creado_en                                DateTime               @default(now()) @db.Timestamptz(6)
+  creado_por                               String                 @db.Char(26)
+  actualizado_en                           DateTime               @default(now()) @db.Timestamptz(6)
+  actualizado_por                          String                 @db.Char(26)
+  clave                                    String                 @db.VarChar(3)
+  nombre                                   String                 @db.VarChar(80)
+  orden                                    Int
+  concepto                                 concepto[]
+  usuario_partida_actualizado_porTousuario usuario                @relation("partida_actualizado_porTousuario", fields: [actualizado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario_partida_creado_porTousuario      usuario                @relation("partida_creado_porTousuario", fields: [creado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario_partida_desactivado_porTousuario usuario?               @relation("partida_desactivado_porTousuario", fields: [desactivado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  empresa                                  empresa                @relation(fields: [empresa_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  presupuesto_concepto                     presupuesto_concepto[]
+
+  @@unique([empresa_id, clave], map: "uq_partida_clave")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model presupuesto {
+  id                                           String               @id @db.Char(26)
+  empresa_id                                   String               @db.Char(26)
+  activo                                       Boolean              @default(true)
+  desactivado_en                               DateTime?            @db.Timestamptz(6)
+  desactivado_por                              String?              @db.Char(26)
+  motivo_desactivacion                         String?
+  creado_en                                    DateTime             @default(now()) @db.Timestamptz(6)
+  creado_por                                   String               @db.Char(26)
+  actualizado_en                               DateTime             @default(now()) @db.Timestamptz(6)
+  actualizado_por                              String               @db.Char(26)
+  proyecto_id                                  String               @db.Char(26)
+  clave                                        String               @db.VarChar(16)
+  nombre                                       String               @db.VarChar(160)
+  estado                                       estado_presupuesto   @default(BORRADOR)
+  metros_cuadrados                             Decimal?             @db.Decimal(14, 4)
+  vigencia_hasta                               DateTime?            @db.Date
+  documento_id                                 String?              @db.Char(26)
+  enviado_en                                   DateTime?            @db.Timestamptz(6)
+  autorizado_en                                DateTime?            @db.Timestamptz(6)
+  notas                                        String?
+  firmado_por                                  String?              @db.VarChar(160)
+  firmado_en                                   DateTime?            @db.Timestamptz(6)
+  usuario_presupuesto_actualizado_porTousuario usuario              @relation("presupuesto_actualizado_porTousuario", fields: [actualizado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario_presupuesto_creado_porTousuario      usuario              @relation("presupuesto_creado_porTousuario", fields: [creado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario_presupuesto_desactivado_porTousuario usuario?             @relation("presupuesto_desactivado_porTousuario", fields: [desactivado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  documento                                    documento?           @relation(fields: [documento_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  empresa                                      empresa              @relation(fields: [empresa_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  proyecto                                     proyecto             @relation(fields: [proyecto_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  presupuesto_opcion                           presupuesto_opcion[]
+
+  @@unique([empresa_id, clave], map: "uq_presupuesto_clave")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model presupuesto_concepto {
+  id                                                    String                @id @db.Char(26)
+  empresa_id                                            String                @db.Char(26)
+  activo                                                Boolean               @default(true)
+  desactivado_en                                        DateTime?             @db.Timestamptz(6)
+  desactivado_por                                       String?               @db.Char(26)
+  motivo_desactivacion                                  String?
+  creado_en                                             DateTime              @default(now()) @db.Timestamptz(6)
+  creado_por                                            String                @db.Char(26)
+  actualizado_en                                        DateTime              @default(now()) @db.Timestamptz(6)
+  actualizado_por                                       String                @db.Char(26)
+  presupuesto_modulo_id                                 String                @db.Char(26)
+  concepto_id                                           String                @db.Char(26)
+  partida_id                                            String                @db.Char(26)
+  descripcion                                           String
+  unidad_id                                             String                @db.Char(26)
+  tipo_precio                                           tipo_precio           @default(FIJO)
+  cantidad                                              Decimal?              @db.Decimal(14, 4)
+  precio_catalogo                                       Decimal?              @db.Decimal(14, 4)
+  precio_costo                                          Decimal?              @db.Decimal(14, 4)
+  precio_venta                                          Decimal?              @db.Decimal(14, 4)
+  porcentaje                                            Decimal?              @db.Decimal(7, 4)
+  orden                                                 Int                   @default(0)
+  notas                                                 String?
+  actividad                                             actividad[]
+  generador                                             generador[]
+  movimiento_concepto                                   movimiento_concepto[]
+  usuario_presupuesto_concepto_actualizado_porTousuario usuario               @relation("presupuesto_concepto_actualizado_porTousuario", fields: [actualizado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  concepto                                              concepto              @relation(fields: [concepto_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario_presupuesto_concepto_creado_porTousuario      usuario               @relation("presupuesto_concepto_creado_porTousuario", fields: [creado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario_presupuesto_concepto_desactivado_porTousuario usuario?              @relation("presupuesto_concepto_desactivado_porTousuario", fields: [desactivado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  empresa                                               empresa               @relation(fields: [empresa_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  partida                                               partida               @relation(fields: [partida_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  presupuesto_modulo                                    presupuesto_modulo    @relation(fields: [presupuesto_modulo_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  unidad                                                unidad                @relation(fields: [unidad_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([concepto_id], map: "ix_pconcepto_concepto")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model presupuesto_modulo {
+  id                                                  String                 @id @db.Char(26)
+  empresa_id                                          String                 @db.Char(26)
+  activo                                              Boolean                @default(true)
+  desactivado_en                                      DateTime?              @db.Timestamptz(6)
+  desactivado_por                                     String?                @db.Char(26)
+  motivo_desactivacion                                String?
+  creado_en                                           DateTime               @default(now()) @db.Timestamptz(6)
+  creado_por                                          String                 @db.Char(26)
+  actualizado_en                                      DateTime               @default(now()) @db.Timestamptz(6)
+  actualizado_por                                     String                 @db.Char(26)
+  presupuesto_opcion_id                               String                 @db.Char(26)
+  clave                                               String                 @db.VarChar(4)
+  nombre                                              String                 @db.VarChar(120)
+  orden                                               Int
+  presupuesto_concepto                                presupuesto_concepto[]
+  usuario_presupuesto_modulo_actualizado_porTousuario usuario                @relation("presupuesto_modulo_actualizado_porTousuario", fields: [actualizado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario_presupuesto_modulo_creado_porTousuario      usuario                @relation("presupuesto_modulo_creado_porTousuario", fields: [creado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario_presupuesto_modulo_desactivado_porTousuario usuario?               @relation("presupuesto_modulo_desactivado_porTousuario", fields: [desactivado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  empresa                                             empresa                @relation(fields: [empresa_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  presupuesto_opcion                                  presupuesto_opcion     @relation(fields: [presupuesto_opcion_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([presupuesto_opcion_id, clave], map: "uq_presupuesto_modulo")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model presupuesto_opcion {
+  id                                                  String               @id @db.Char(26)
+  empresa_id                                          String               @db.Char(26)
+  activo                                              Boolean              @default(true)
+  desactivado_en                                      DateTime?            @db.Timestamptz(6)
+  desactivado_por                                     String?              @db.Char(26)
+  motivo_desactivacion                                String?
+  creado_en                                           DateTime             @default(now()) @db.Timestamptz(6)
+  creado_por                                          String               @db.Char(26)
+  actualizado_en                                      DateTime             @default(now()) @db.Timestamptz(6)
+  actualizado_por                                     String               @db.Char(26)
+  presupuesto_id                                      String               @db.Char(26)
+  clave                                               String               @db.VarChar(8)
+  nombre                                              String               @db.VarChar(80)
+  es_vigente                                          Boolean              @default(false)
+  mostrar_porcentuales_desglosados                    Boolean              @default(true)
+  presupuesto_modulo                                  presupuesto_modulo[]
+  usuario_presupuesto_opcion_actualizado_porTousuario usuario              @relation("presupuesto_opcion_actualizado_porTousuario", fields: [actualizado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario_presupuesto_opcion_creado_porTousuario      usuario              @relation("presupuesto_opcion_creado_porTousuario", fields: [creado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario_presupuesto_opcion_desactivado_porTousuario usuario?             @relation("presupuesto_opcion_desactivado_porTousuario", fields: [desactivado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  empresa                                             empresa              @relation(fields: [empresa_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  presupuesto                                         presupuesto          @relation(fields: [presupuesto_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([presupuesto_id, clave], map: "uq_presupuesto_opcion")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model proveedor {
+  id                                         String        @id @db.Char(26)
+  empresa_id                                 String        @db.Char(26)
+  activo                                     Boolean       @default(true)
+  desactivado_en                             DateTime?     @db.Timestamptz(6)
+  desactivado_por                            String?       @db.Char(26)
+  motivo_desactivacion                       String?
+  creado_en                                  DateTime      @default(now()) @db.Timestamptz(6)
+  creado_por                                 String        @db.Char(26)
+  actualizado_en                             DateTime      @default(now()) @db.Timestamptz(6)
+  actualizado_por                            String        @db.Char(26)
+  clave                                      String        @db.VarChar(12)
+  empresa_nombre                             String?       @db.VarChar(160)
+  persona                                    String?       @db.VarChar(120)
+  especialidad                               String?       @db.VarChar(80)
+  rfc                                        String?       @db.VarChar(13)
+  telefono                                   String?       @db.VarChar(30)
+  correo                                     String?       @db.VarChar(160)
+  ciudad                                     String?       @db.VarChar(80)
+  estado                                     String?       @db.VarChar(80)
+  forma_pago                                 forma_pago?
+  banco                                      String?       @db.VarChar(60)
+  clabe                                      String?       @db.VarChar(18)
+  compromiso                                 compromiso[]
+  cotizacion                                 cotizacion[]
+  insumo                                     insumo[]
+  movimiento                                 movimiento[]
+  usuario_proveedor_actualizado_porTousuario usuario       @relation("proveedor_actualizado_porTousuario", fields: [actualizado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario_proveedor_creado_porTousuario      usuario       @relation("proveedor_creado_porTousuario", fields: [creado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario_proveedor_desactivado_porTousuario usuario?      @relation("proveedor_desactivado_porTousuario", fields: [desactivado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  empresa                                    empresa       @relation(fields: [empresa_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  requisicion                                requisicion[]
+
+  @@unique([empresa_id, clave], map: "uq_proveedor_clave")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model proyecto {
+  id                                        String           @id @db.Char(26)
+  empresa_id                                String           @db.Char(26)
+  activo                                    Boolean          @default(true)
+  desactivado_en                            DateTime?        @db.Timestamptz(6)
+  desactivado_por                           String?          @db.Char(26)
+  motivo_desactivacion                      String?
+  creado_en                                 DateTime         @default(now()) @db.Timestamptz(6)
+  creado_por                                String           @db.Char(26)
+  actualizado_en                            DateTime         @default(now()) @db.Timestamptz(6)
+  actualizado_por                           String           @db.Char(26)
+  clave                                     String           @db.VarChar(4)
+  nombre                                    String           @db.VarChar(160)
+  cliente_id                                String           @db.Char(26)
+  direccion                                 String?
+  etapa_bim                                 etapa_bim        @default(AP)
+  fecha_inicio_obra                         DateTime?        @db.Date
+  metros_cuadrados                          Decimal?         @db.Decimal(14, 4)
+  notas                                     String?
+  actividad                                 actividad[]
+  alerta                                    alerta[]
+  carta_entrega                             carta_entrega[]
+  compromiso                                compromiso[]
+  cotizacion                                cotizacion[]
+  documento                                 documento[]
+  evento                                    evento[]
+  linea_base                                linea_base[]
+  movimiento                                movimiento[]
+  presupuesto                               presupuesto[]
+  usuario_proyecto_actualizado_porTousuario usuario          @relation("proyecto_actualizado_porTousuario", fields: [actualizado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  cliente                                   cliente          @relation(fields: [cliente_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario_proyecto_creado_porTousuario      usuario          @relation("proyecto_creado_porTousuario", fields: [creado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario_proyecto_desactivado_porTousuario usuario?         @relation("proyecto_desactivado_porTousuario", fields: [desactivado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  empresa                                   empresa          @relation(fields: [empresa_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  requisicion                               requisicion[]
+  semana_flujo                              semana_flujo[]
+  tramo_cobranza                            tramo_cobranza[]
+  usuario_rol                               usuario_rol[]
+
+  @@unique([empresa_id, clave], map: "uq_proyecto_clave")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model renglon_tarjeta {
+  id                                               String      @id @db.Char(26)
+  empresa_id                                       String      @db.Char(26)
+  activo                                           Boolean     @default(true)
+  desactivado_en                                   DateTime?   @db.Timestamptz(6)
+  desactivado_por                                  String?     @db.Char(26)
+  motivo_desactivacion                             String?
+  creado_en                                        DateTime    @default(now()) @db.Timestamptz(6)
+  creado_por                                       String      @db.Char(26)
+  actualizado_en                                   DateTime    @default(now()) @db.Timestamptz(6)
+  actualizado_por                                  String      @db.Char(26)
+  tarjeta_id                                       String      @db.Char(26)
+  insumo_id                                        String      @db.Char(26)
+  tipo                                             tipo_insumo
+  descripcion                                      String
+  unidad_id                                        String      @db.Char(26)
+  cantidad                                         Decimal     @db.Decimal(14, 4)
+  rendimiento                                      Decimal     @default(1) @db.Decimal(14, 4)
+  costo_unitario                                   Decimal     @db.Decimal(14, 4)
+  desperdicio_pct                                  Decimal     @default(0) @db.Decimal(7, 4)
+  orden                                            Int         @default(0)
+  notas                                            String?
+  usuario_renglon_tarjeta_actualizado_porTousuario usuario     @relation("renglon_tarjeta_actualizado_porTousuario", fields: [actualizado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario_renglon_tarjeta_creado_porTousuario      usuario     @relation("renglon_tarjeta_creado_porTousuario", fields: [creado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario_renglon_tarjeta_desactivado_porTousuario usuario?    @relation("renglon_tarjeta_desactivado_porTousuario", fields: [desactivado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  empresa                                          empresa     @relation(fields: [empresa_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  insumo                                           insumo      @relation(fields: [insumo_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  tarjeta                                          tarjeta     @relation(fields: [tarjeta_id], references: [id], onUpdate: NoAction)
+  unidad                                           unidad      @relation(fields: [unidad_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model requisicion {
+  id                                           String                 @id @db.Char(26)
+  empresa_id                                   String                 @db.Char(26)
+  activo                                       Boolean                @default(true)
+  desactivado_en                               DateTime?              @db.Timestamptz(6)
+  desactivado_por                              String?                @db.Char(26)
+  motivo_desactivacion                         String?
+  creado_en                                    DateTime               @default(now()) @db.Timestamptz(6)
+  creado_por                                   String                 @db.Char(26)
+  actualizado_en                               DateTime               @default(now()) @db.Timestamptz(6)
+  actualizado_por                              String                 @db.Char(26)
+  proyecto_id                                  String                 @db.Char(26)
+  clave                                        String                 @db.VarChar(16)
+  cotizacion_id                                String                 @db.Char(26)
+  proveedor_id                                 String                 @db.Char(26)
+  estado                                       estado_requisicion     @default(SOLICITADA)
+  forma_pago                                   forma_pago
+  importe                                      Decimal                @db.Decimal(16, 4)
+  compromiso_id                                String?                @db.Char(26)
+  levantada_por                                String                 @db.Char(26)
+  validada_por                                 String?                @db.Char(26)
+  aprobada_por                                 String?                @db.Char(26)
+  pagada_por                                   String?                @db.Char(26)
+  autorrevision_motivo                         String?
+  carta_entrega                                carta_entrega[]
+  entrega                                      entrega[]
+  compromiso                                   compromiso?            @relation(fields: [compromiso_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_requisicion_compromiso_id")
+  usuario_requisicion_actualizado_porTousuario usuario                @relation("requisicion_actualizado_porTousuario", fields: [actualizado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario_requisicion_aprobada_porTousuario    usuario?               @relation("requisicion_aprobada_porTousuario", fields: [aprobada_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  cotizacion                                   cotizacion             @relation(fields: [cotizacion_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario_requisicion_creado_porTousuario      usuario                @relation("requisicion_creado_porTousuario", fields: [creado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario_requisicion_desactivado_porTousuario usuario?               @relation("requisicion_desactivado_porTousuario", fields: [desactivado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  empresa                                      empresa                @relation(fields: [empresa_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario_requisicion_levantada_porTousuario   usuario                @relation("requisicion_levantada_porTousuario", fields: [levantada_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario_requisicion_pagada_porTousuario      usuario?               @relation("requisicion_pagada_porTousuario", fields: [pagada_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  proveedor                                    proveedor              @relation(fields: [proveedor_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  proyecto                                     proyecto               @relation(fields: [proyecto_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario_requisicion_validada_porTousuario    usuario?               @relation("requisicion_validada_porTousuario", fields: [validada_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  requisicion_concepto                         requisicion_concepto[]
+  requisicion_renglon                          requisicion_renglon[]
+
+  @@unique([empresa_id, clave], map: "uq_requisicion_clave")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model requisicion_concepto {
+  id             String      @id @db.Char(26)
+  empresa_id     String      @db.Char(26)
+  requisicion_id String      @db.Char(26)
+  concepto_id    String      @db.Char(26)
+  concepto       concepto    @relation(fields: [concepto_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  empresa        empresa     @relation(fields: [empresa_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  requisicion    requisicion @relation(fields: [requisicion_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([requisicion_id, concepto_id], map: "uq_requisicion_concepto")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model requisicion_renglon {
+  id                                                   String      @id @db.Char(26)
+  empresa_id                                           String      @db.Char(26)
+  activo                                               Boolean     @default(true)
+  desactivado_en                                       DateTime?   @db.Timestamptz(6)
+  desactivado_por                                      String?     @db.Char(26)
+  motivo_desactivacion                                 String?
+  creado_en                                            DateTime    @default(now()) @db.Timestamptz(6)
+  creado_por                                           String      @db.Char(26)
+  actualizado_en                                       DateTime    @default(now()) @db.Timestamptz(6)
+  actualizado_por                                      String      @db.Char(26)
+  requisicion_id                                       String      @db.Char(26)
+  descripcion                                          String
+  unidad_id                                            String      @db.Char(26)
+  cantidad                                             Decimal     @db.Decimal(14, 4)
+  precio_unitario                                      Decimal     @db.Decimal(14, 4)
+  insumo_id                                            String?     @db.Char(26)
+  usuario_requisicion_renglon_actualizado_porTousuario usuario     @relation("requisicion_renglon_actualizado_porTousuario", fields: [actualizado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario_requisicion_renglon_creado_porTousuario      usuario     @relation("requisicion_renglon_creado_porTousuario", fields: [creado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario_requisicion_renglon_desactivado_porTousuario usuario?    @relation("requisicion_renglon_desactivado_porTousuario", fields: [desactivado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  empresa                                              empresa     @relation(fields: [empresa_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  insumo                                               insumo?     @relation(fields: [insumo_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  requisicion                                          requisicion @relation(fields: [requisicion_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  unidad                                               unidad      @relation(fields: [unidad_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model rol {
+  id          String        @id @db.Char(26)
+  clave       String        @unique(map: "uq_rol_clave") @db.VarChar(40)
+  nombre      String        @db.VarChar(80)
+  alerta      alerta[]
+  usuario_rol usuario_rol[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model semana_flujo {
+  id                                            String    @id @db.Char(26)
+  empresa_id                                    String    @db.Char(26)
+  activo                                        Boolean   @default(true)
+  desactivado_en                                DateTime? @db.Timestamptz(6)
+  desactivado_por                               String?   @db.Char(26)
+  motivo_desactivacion                          String?
+  creado_en                                     DateTime  @default(now()) @db.Timestamptz(6)
+  creado_por                                    String    @db.Char(26)
+  actualizado_en                                DateTime  @default(now()) @db.Timestamptz(6)
+  actualizado_por                               String    @db.Char(26)
+  proyecto_id                                   String    @db.Char(26)
+  numero                                        Int
+  fecha_inicio                                  DateTime  @db.Date
+  fecha_fin                                     DateTime  @db.Date
+  usuario_semana_flujo_actualizado_porTousuario usuario   @relation("semana_flujo_actualizado_porTousuario", fields: [actualizado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario_semana_flujo_creado_porTousuario      usuario   @relation("semana_flujo_creado_porTousuario", fields: [creado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario_semana_flujo_desactivado_porTousuario usuario?  @relation("semana_flujo_desactivado_porTousuario", fields: [desactivado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  empresa                                       empresa   @relation(fields: [empresa_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  proyecto                                      proyecto  @relation(fields: [proyecto_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([proyecto_id, numero], map: "uq_semana_flujo")
+}
+
+model sincronizacion_recibida {
+  id                 String   @id @db.Char(26)
+  empresa_id         String   @db.Char(26)
+  clave_idempotencia String   @db.Char(26)
+  entidad_tipo       String   @db.VarChar(40)
+  entidad_id         String   @db.Char(26)
+  recibido_en        DateTime @default(now()) @db.Timestamptz(6)
+  empresa            empresa  @relation(fields: [empresa_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([empresa_id, clave_idempotencia], map: "uq_sincronizacion_recibida")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model tarjeta {
+  id                                       String            @id @db.Char(26)
+  empresa_id                               String            @db.Char(26)
+  activo                                   Boolean           @default(true)
+  desactivado_en                           DateTime?         @db.Timestamptz(6)
+  desactivado_por                          String?           @db.Char(26)
+  motivo_desactivacion                     String?
+  creado_en                                DateTime          @default(now()) @db.Timestamptz(6)
+  creado_por                               String            @db.Char(26)
+  actualizado_en                           DateTime          @default(now()) @db.Timestamptz(6)
+  actualizado_por                          String            @db.Char(26)
+  concepto_id                              String            @unique(map: "uq_tarjeta_concepto") @db.Char(26)
+  modo                                     modo_tarjeta
+  notas                                    String?
+  renglon_tarjeta                          renglon_tarjeta[]
+  usuario_tarjeta_actualizado_porTousuario usuario           @relation("tarjeta_actualizado_porTousuario", fields: [actualizado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  concepto                                 concepto          @relation(fields: [concepto_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario_tarjeta_creado_porTousuario      usuario           @relation("tarjeta_creado_porTousuario", fields: [creado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario_tarjeta_desactivado_porTousuario usuario?          @relation("tarjeta_desactivado_porTousuario", fields: [desactivado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  empresa                                  empresa           @relation(fields: [empresa_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model tramo_cobranza {
+  id                                              String       @id @db.Char(26)
+  empresa_id                                      String       @db.Char(26)
+  activo                                          Boolean      @default(true)
+  desactivado_en                                  DateTime?    @db.Timestamptz(6)
+  desactivado_por                                 String?      @db.Char(26)
+  motivo_desactivacion                            String?
+  creado_en                                       DateTime     @default(now()) @db.Timestamptz(6)
+  creado_por                                      String       @db.Char(26)
+  actualizado_en                                  DateTime     @default(now()) @db.Timestamptz(6)
+  actualizado_por                                 String       @db.Char(26)
+  proyecto_id                                     String       @db.Char(26)
+  orden                                           Int
+  nombre                                          String       @db.VarChar(80)
+  porcentaje                                      Decimal      @db.Decimal(7, 4)
+  semana_corte_calculada                          Int?
+  semana_corte_forzada                            Int?
+  motivo_forzado                                  String?
+  forzado_por                                     String?      @db.Char(26)
+  forzado_en                                      DateTime?    @db.Timestamptz(6)
+  fecha_programada                                DateTime?    @db.Date
+  estado                                          estado_tramo @default(PENDIENTE)
+  compromiso_id                                   String?      @db.Char(26)
+  compromiso                                      compromiso?  @relation(fields: [compromiso_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_tramo_cobranza_compromiso_id")
+  usuario_tramo_cobranza_actualizado_porTousuario usuario      @relation("tramo_cobranza_actualizado_porTousuario", fields: [actualizado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario_tramo_cobranza_creado_porTousuario      usuario      @relation("tramo_cobranza_creado_porTousuario", fields: [creado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario_tramo_cobranza_desactivado_porTousuario usuario?     @relation("tramo_cobranza_desactivado_porTousuario", fields: [desactivado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  empresa                                         empresa      @relation(fields: [empresa_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario_tramo_cobranza_forzado_porTousuario     usuario?     @relation("tramo_cobranza_forzado_porTousuario", fields: [forzado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  proyecto                                        proyecto     @relation(fields: [proyecto_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([proyecto_id, orden], map: "uq_tramo_cobranza")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model unidad {
+  id                                      String                 @id @db.Char(26)
+  empresa_id                              String                 @db.Char(26)
+  activo                                  Boolean                @default(true)
+  desactivado_en                          DateTime?              @db.Timestamptz(6)
+  desactivado_por                         String?                @db.Char(26)
+  motivo_desactivacion                    String?
+  creado_en                               DateTime               @default(now()) @db.Timestamptz(6)
+  creado_por                              String                 @db.Char(26)
+  actualizado_en                          DateTime               @default(now()) @db.Timestamptz(6)
+  actualizado_por                         String                 @db.Char(26)
+  clave                                   String                 @db.VarChar(12)
+  nombre                                  String                 @db.VarChar(60)
+  simbolo                                 String                 @db.VarChar(8)
+  decimales                               Int                    @default(2) @db.SmallInt
+  concepto                                concepto[]
+  insumo                                  insumo[]
+  presupuesto_concepto                    presupuesto_concepto[]
+  renglon_tarjeta                         renglon_tarjeta[]
+  requisicion_renglon                     requisicion_renglon[]
+  usuario_unidad_actualizado_porTousuario usuario                @relation("unidad_actualizado_porTousuario", fields: [actualizado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario_unidad_creado_porTousuario      usuario                @relation("unidad_creado_porTousuario", fields: [creado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario_unidad_desactivado_porTousuario usuario?               @relation("unidad_desactivado_porTousuario", fields: [desactivado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  empresa                                 empresa                @relation(fields: [empresa_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([empresa_id, clave], map: "uq_unidad_clave")
+}
+
+model usuario {
+  id                                                                 String                 @id @db.Char(26)
+  correo                                                             String                 @unique(map: "uq_usuario_correo") @db.VarChar(160)
+  nombre                                                             String                 @db.VarChar(120)
+  hash_password                                                      String
+  activo                                                             Boolean                @default(true)
+  abono_abono_actualizado_porTousuario                               abono[]                @relation("abono_actualizado_porTousuario")
+  abono_abono_creado_porTousuario                                    abono[]                @relation("abono_creado_porTousuario")
+  abono_abono_desactivado_porTousuario                               abono[]                @relation("abono_desactivado_porTousuario")
+  actividad_actividad_actualizado_porTousuario                       actividad[]            @relation("actividad_actualizado_porTousuario")
+  actividad_actividad_creado_porTousuario                            actividad[]            @relation("actividad_creado_porTousuario")
+  actividad_actividad_desactivado_porTousuario                       actividad[]            @relation("actividad_desactivado_porTousuario")
+  alerta_alerta_actualizado_porTousuario                             alerta[]               @relation("alerta_actualizado_porTousuario")
+  alerta_alerta_creado_porTousuario                                  alerta[]               @relation("alerta_creado_porTousuario")
+  alerta_alerta_desactivado_porTousuario                             alerta[]               @relation("alerta_desactivado_porTousuario")
+  alerta_alerta_resuelta_porTousuario                                alerta[]               @relation("alerta_resuelta_porTousuario")
+  avance_avance_actualizado_porTousuario                             avance[]               @relation("avance_actualizado_porTousuario")
+  avance_avance_creado_porTousuario                                  avance[]               @relation("avance_creado_porTousuario")
+  avance_avance_desactivado_porTousuario                             avance[]               @relation("avance_desactivado_porTousuario")
+  carta_entrega_carta_entrega_actualizado_porTousuario               carta_entrega[]        @relation("carta_entrega_actualizado_porTousuario")
+  carta_entrega_carta_entrega_creado_porTousuario                    carta_entrega[]        @relation("carta_entrega_creado_porTousuario")
+  carta_entrega_carta_entrega_desactivado_porTousuario               carta_entrega[]        @relation("carta_entrega_desactivado_porTousuario")
+  categoria_gasto_categoria_gasto_actualizado_porTousuario           categoria_gasto[]      @relation("categoria_gasto_actualizado_porTousuario")
+  categoria_gasto_categoria_gasto_creado_porTousuario                categoria_gasto[]      @relation("categoria_gasto_creado_porTousuario")
+  categoria_gasto_categoria_gasto_desactivado_porTousuario           categoria_gasto[]      @relation("categoria_gasto_desactivado_porTousuario")
+  cliente_cliente_actualizado_porTousuario                           cliente[]              @relation("cliente_actualizado_porTousuario")
+  cliente_cliente_creado_porTousuario                                cliente[]              @relation("cliente_creado_porTousuario")
+  cliente_cliente_desactivado_porTousuario                           cliente[]              @relation("cliente_desactivado_porTousuario")
+  compromiso_compromiso_actualizado_porTousuario                     compromiso[]           @relation("compromiso_actualizado_porTousuario")
+  compromiso_compromiso_creado_porTousuario                          compromiso[]           @relation("compromiso_creado_porTousuario")
+  compromiso_compromiso_desactivado_porTousuario                     compromiso[]           @relation("compromiso_desactivado_porTousuario")
+  concepto_concepto_actualizado_porTousuario                         concepto[]             @relation("concepto_actualizado_porTousuario")
+  concepto_concepto_creado_porTousuario                              concepto[]             @relation("concepto_creado_porTousuario")
+  concepto_concepto_desactivado_porTousuario                         concepto[]             @relation("concepto_desactivado_porTousuario")
+  cotizacion_cotizacion_actualizado_porTousuario                     cotizacion[]           @relation("cotizacion_actualizado_porTousuario")
+  cotizacion_cotizacion_creado_porTousuario                          cotizacion[]           @relation("cotizacion_creado_porTousuario")
+  cotizacion_cotizacion_desactivado_porTousuario                     cotizacion[]           @relation("cotizacion_desactivado_porTousuario")
+  documento_documento_actualizado_porTousuario                       documento[]            @relation("documento_actualizado_porTousuario")
+  documento_documento_creado_porTousuario                            documento[]            @relation("documento_creado_porTousuario")
+  documento_documento_desactivado_porTousuario                       documento[]            @relation("documento_desactivado_porTousuario")
+  entrega_entrega_actualizado_porTousuario                           entrega[]              @relation("entrega_actualizado_porTousuario")
+  entrega_entrega_creado_porTousuario                                entrega[]              @relation("entrega_creado_porTousuario")
+  entrega_entrega_desactivado_porTousuario                           entrega[]              @relation("entrega_desactivado_porTousuario")
+  entrega_entrega_recibida_porTousuario                              entrega[]              @relation("entrega_recibida_porTousuario")
+  evento_evento_actualizado_porTousuario                             evento[]               @relation("evento_actualizado_porTousuario")
+  evento_evento_creado_porTousuario                                  evento[]               @relation("evento_creado_porTousuario")
+  evento_evento_desactivado_porTousuario                             evento[]               @relation("evento_desactivado_porTousuario")
+  evento_adjunto_evento_adjunto_actualizado_porTousuario             evento_adjunto[]       @relation("evento_adjunto_actualizado_porTousuario")
+  evento_adjunto_evento_adjunto_creado_porTousuario                  evento_adjunto[]       @relation("evento_adjunto_creado_porTousuario")
+  evento_adjunto_evento_adjunto_desactivado_porTousuario             evento_adjunto[]       @relation("evento_adjunto_desactivado_porTousuario")
+  evento_estado                                                      evento_estado[]
+  evento_foto_evento_foto_actualizado_porTousuario                   evento_foto[]          @relation("evento_foto_actualizado_porTousuario")
+  evento_foto_evento_foto_creado_porTousuario                        evento_foto[]          @relation("evento_foto_creado_porTousuario")
+  evento_foto_evento_foto_desactivado_porTousuario                   evento_foto[]          @relation("evento_foto_desactivado_porTousuario")
+  generador_generador_actualizado_porTousuario                       generador[]            @relation("generador_actualizado_porTousuario")
+  generador_generador_creado_porTousuario                            generador[]            @relation("generador_creado_porTousuario")
+  generador_generador_desactivado_porTousuario                       generador[]            @relation("generador_desactivado_porTousuario")
+  insumo_insumo_actualizado_porTousuario                             insumo[]               @relation("insumo_actualizado_porTousuario")
+  insumo_insumo_creado_porTousuario                                  insumo[]               @relation("insumo_creado_porTousuario")
+  insumo_insumo_desactivado_porTousuario                             insumo[]               @relation("insumo_desactivado_porTousuario")
+  linea_base_linea_base_actualizado_porTousuario                     linea_base[]           @relation("linea_base_actualizado_porTousuario")
+  linea_base_linea_base_creado_porTousuario                          linea_base[]           @relation("linea_base_creado_porTousuario")
+  linea_base_linea_base_desactivado_porTousuario                     linea_base[]           @relation("linea_base_desactivado_porTousuario")
+  movimiento_movimiento_actualizado_porTousuario                     movimiento[]           @relation("movimiento_actualizado_porTousuario")
+  movimiento_movimiento_creado_porTousuario                          movimiento[]           @relation("movimiento_creado_porTousuario")
+  movimiento_movimiento_desactivado_porTousuario                     movimiento[]           @relation("movimiento_desactivado_porTousuario")
+  partida_partida_actualizado_porTousuario                           partida[]              @relation("partida_actualizado_porTousuario")
+  partida_partida_creado_porTousuario                                partida[]              @relation("partida_creado_porTousuario")
+  partida_partida_desactivado_porTousuario                           partida[]              @relation("partida_desactivado_porTousuario")
+  presupuesto_presupuesto_actualizado_porTousuario                   presupuesto[]          @relation("presupuesto_actualizado_porTousuario")
+  presupuesto_presupuesto_creado_porTousuario                        presupuesto[]          @relation("presupuesto_creado_porTousuario")
+  presupuesto_presupuesto_desactivado_porTousuario                   presupuesto[]          @relation("presupuesto_desactivado_porTousuario")
+  presupuesto_concepto_presupuesto_concepto_actualizado_porTousuario presupuesto_concepto[] @relation("presupuesto_concepto_actualizado_porTousuario")
+  presupuesto_concepto_presupuesto_concepto_creado_porTousuario      presupuesto_concepto[] @relation("presupuesto_concepto_creado_porTousuario")
+  presupuesto_concepto_presupuesto_concepto_desactivado_porTousuario presupuesto_concepto[] @relation("presupuesto_concepto_desactivado_porTousuario")
+  presupuesto_modulo_presupuesto_modulo_actualizado_porTousuario     presupuesto_modulo[]   @relation("presupuesto_modulo_actualizado_porTousuario")
+  presupuesto_modulo_presupuesto_modulo_creado_porTousuario          presupuesto_modulo[]   @relation("presupuesto_modulo_creado_porTousuario")
+  presupuesto_modulo_presupuesto_modulo_desactivado_porTousuario     presupuesto_modulo[]   @relation("presupuesto_modulo_desactivado_porTousuario")
+  presupuesto_opcion_presupuesto_opcion_actualizado_porTousuario     presupuesto_opcion[]   @relation("presupuesto_opcion_actualizado_porTousuario")
+  presupuesto_opcion_presupuesto_opcion_creado_porTousuario          presupuesto_opcion[]   @relation("presupuesto_opcion_creado_porTousuario")
+  presupuesto_opcion_presupuesto_opcion_desactivado_porTousuario     presupuesto_opcion[]   @relation("presupuesto_opcion_desactivado_porTousuario")
+  proveedor_proveedor_actualizado_porTousuario                       proveedor[]            @relation("proveedor_actualizado_porTousuario")
+  proveedor_proveedor_creado_porTousuario                            proveedor[]            @relation("proveedor_creado_porTousuario")
+  proveedor_proveedor_desactivado_porTousuario                       proveedor[]            @relation("proveedor_desactivado_porTousuario")
+  proyecto_proyecto_actualizado_porTousuario                         proyecto[]             @relation("proyecto_actualizado_porTousuario")
+  proyecto_proyecto_creado_porTousuario                              proyecto[]             @relation("proyecto_creado_porTousuario")
+  proyecto_proyecto_desactivado_porTousuario                         proyecto[]             @relation("proyecto_desactivado_porTousuario")
+  renglon_tarjeta_renglon_tarjeta_actualizado_porTousuario           renglon_tarjeta[]      @relation("renglon_tarjeta_actualizado_porTousuario")
+  renglon_tarjeta_renglon_tarjeta_creado_porTousuario                renglon_tarjeta[]      @relation("renglon_tarjeta_creado_porTousuario")
+  renglon_tarjeta_renglon_tarjeta_desactivado_porTousuario           renglon_tarjeta[]      @relation("renglon_tarjeta_desactivado_porTousuario")
+  requisicion_requisicion_actualizado_porTousuario                   requisicion[]          @relation("requisicion_actualizado_porTousuario")
+  requisicion_requisicion_aprobada_porTousuario                      requisicion[]          @relation("requisicion_aprobada_porTousuario")
+  requisicion_requisicion_creado_porTousuario                        requisicion[]          @relation("requisicion_creado_porTousuario")
+  requisicion_requisicion_desactivado_porTousuario                   requisicion[]          @relation("requisicion_desactivado_porTousuario")
+  requisicion_requisicion_levantada_porTousuario                     requisicion[]          @relation("requisicion_levantada_porTousuario")
+  requisicion_requisicion_pagada_porTousuario                        requisicion[]          @relation("requisicion_pagada_porTousuario")
+  requisicion_requisicion_validada_porTousuario                      requisicion[]          @relation("requisicion_validada_porTousuario")
+  requisicion_renglon_requisicion_renglon_actualizado_porTousuario   requisicion_renglon[]  @relation("requisicion_renglon_actualizado_porTousuario")
+  requisicion_renglon_requisicion_renglon_creado_porTousuario        requisicion_renglon[]  @relation("requisicion_renglon_creado_porTousuario")
+  requisicion_renglon_requisicion_renglon_desactivado_porTousuario   requisicion_renglon[]  @relation("requisicion_renglon_desactivado_porTousuario")
+  semana_flujo_semana_flujo_actualizado_porTousuario                 semana_flujo[]         @relation("semana_flujo_actualizado_porTousuario")
+  semana_flujo_semana_flujo_creado_porTousuario                      semana_flujo[]         @relation("semana_flujo_creado_porTousuario")
+  semana_flujo_semana_flujo_desactivado_porTousuario                 semana_flujo[]         @relation("semana_flujo_desactivado_porTousuario")
+  tarjeta_tarjeta_actualizado_porTousuario                           tarjeta[]              @relation("tarjeta_actualizado_porTousuario")
+  tarjeta_tarjeta_creado_porTousuario                                tarjeta[]              @relation("tarjeta_creado_porTousuario")
+  tarjeta_tarjeta_desactivado_porTousuario                           tarjeta[]              @relation("tarjeta_desactivado_porTousuario")
+  tramo_cobranza_tramo_cobranza_actualizado_porTousuario             tramo_cobranza[]       @relation("tramo_cobranza_actualizado_porTousuario")
+  tramo_cobranza_tramo_cobranza_creado_porTousuario                  tramo_cobranza[]       @relation("tramo_cobranza_creado_porTousuario")
+  tramo_cobranza_tramo_cobranza_desactivado_porTousuario             tramo_cobranza[]       @relation("tramo_cobranza_desactivado_porTousuario")
+  tramo_cobranza_tramo_cobranza_forzado_porTousuario                 tramo_cobranza[]       @relation("tramo_cobranza_forzado_porTousuario")
+  unidad_unidad_actualizado_porTousuario                             unidad[]               @relation("unidad_actualizado_porTousuario")
+  unidad_unidad_creado_porTousuario                                  unidad[]               @relation("unidad_creado_porTousuario")
+  unidad_unidad_desactivado_porTousuario                             unidad[]               @relation("unidad_desactivado_porTousuario")
+  usuario_rol                                                        usuario_rol[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model usuario_rol {
+  id          String    @id @db.Char(26)
+  empresa_id  String    @db.Char(26)
+  usuario_id  String    @db.Char(26)
+  rol_id      String    @db.Char(26)
+  proyecto_id String?   @db.Char(26)
+  activo      Boolean   @default(true)
+  proyecto    proyecto? @relation(fields: [proyecto_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_usuario_rol_proyecto_id")
+  empresa     empresa   @relation(fields: [empresa_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  rol         rol       @relation(fields: [rol_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario     usuario   @relation(fields: [usuario_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([empresa_id, usuario_id, rol_id, proyecto_id], map: "uq_usuario_rol")
+}
+
+enum categoria_gasto_n1 {
+  MATERIAL
+  MANO_DE_OBRA
+  SUBCONTRATO
+  HERRAMIENTA_Y_EQUIPO
+  INDIRECTO
+  VIATICOS_Y_COMBUSTIBLE
+  TRAMITES_Y_DERECHOS
+  NOMINA
+  EXTRAORDINARIO
+}
+
+enum direccion_dinero {
+  POR_COBRAR
+  POR_PAGAR
+}
+
+enum estado_concepto_obra {
+  NO_INICIADO
+  EN_PROCESO
+  PARCIAL_ENTREGADO
+  ENTREGADO
+}
+
+enum estado_documento {
+  S0
+  S1
+  S2
+  S3
+  S4
+  S6
+  S7
+  A0
+  A1
+  A2
+  A3
+  A4
+  A5
+  A6
+  A7
+  B0
+  B1
+  B2
+  B3
+  B4
+  B5
+  B6
+  B7
+  CR
+}
+
+enum estado_presupuesto {
+  BORRADOR
+  ENVIADO
+  AUTORIZADO
+  RECHAZADO
+  CERRADO
+}
+
+enum estado_requisicion {
+  SOLICITADA
+  APROBADA
+  PAGADA
+  POR_ENTREGAR
+  PARCIAL_ENTREGADO
+  ENTREGADA
+  CANCELADA
+}
+
+enum estado_tramo {
+  PENDIENTE
+  SOLICITADO
+  COBRADO
+}
+
+enum etapa_bim {
+  AP
+  PE
+  OB
+  AS
+}
+
+enum factor_aplicacion {
+  POR_CONCEPTO
+  POR_DIA
+  PCT_MANO_OBRA
+  PCT_TOTAL
+}
+
+enum forma_pago {
+  EFECTIVO
+  TRANSFERENCIA
+  CHEQUE
+  TARJETA
+}
+
+enum modo_tarjeta {
+  A_CUADRILLA
+  B_PORCENTAJE
+}
+
+enum origen_compromiso {
+  TRAMO_COBRANZA
+  REQUISICION
+  NOMINA
+  DESTAJO
+  VIATICO
+}
+
+enum tipo_insumo {
+  MATERIAL
+  MANO_OBRA
+  HERRAMIENTA
+  HERRAMIENTA_MENOR
+  INDIRECTO
+  SUBCONTRATO
+}
+
+enum tipo_precio {
+  FIJO
+  PORCENTAJE_OBRA
+  PORCENTAJE_PARTIDA
+}
